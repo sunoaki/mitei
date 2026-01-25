@@ -1,4 +1,4 @@
-import { IRR } from "..";
+import { IRR } from "../types";
 export default class IRRContent implements IRR.Content {
 	public descriptions?: string[];
 	public remarks?: string[];

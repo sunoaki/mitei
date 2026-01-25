@@ -1,4 +1,4 @@
-import { IRR } from "..";
+import { IRR } from "../types";
 import * as asSet from ".";
 
 const asSetContent = new asSet.ASSetContent();

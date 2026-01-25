@@ -1,4 +1,4 @@
-import { IRR } from "..";
+import { IRR } from "../types";
 
 /** Checks if a value is a valid IRR.Source */
 export function inSource(value: any) {

@@ -1,6 +1,6 @@
-import { IRR } from "..";
+import { IRR } from "../types";
 
-export class IRRRecord implements IRR.Record {
+export class IRRObject implements IRR.Object {
 	public readonly name: string;
 	public readonly type: IRR.Type;
 	public readonly source: IRR.Source;

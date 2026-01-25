@@ -1,6 +1,7 @@
-import { IRR } from "..";
+import { IRR } from "../types";
+import { as_set } from "./types";
 import IRRContent from "../base/content";
-import { IRRRecord } from "../base/record";
+import { IRRObject } from "../base/record";
 import { inSource } from "../base/tools";
 import { isValidASNName, isValidASSETName } from "./validator";
 import { isRPSLName, INVALID_RPSL_NAME } from "../base/tools";
@@ -19,7 +20,7 @@ export const errorList = {
 	AS_SET_SOURCE_INVALID: new Error("Invalid source provided for AS_SET."),
 };
 
-export class ASSetMember implements IRR.recordReference {
+export class ASSetMember implements as_set.Member {
 	public name: string;
 	public source: IRR.Source;
 	public remarks?: string[];
@@ -43,7 +44,7 @@ export class ASSetMember implements IRR.recordReference {
 	}
 }
 
-export class ASSetContent extends IRRContent implements IRR.Content {
+export class ASSetContent extends IRRContent implements as_set.Content {
 	// we simulate members as a set using an array.
 	public members: ASSetMember[];
 
@@ -141,8 +142,9 @@ export class ASSetContent extends IRRContent implements IRR.Content {
 	}
 }
 
-export class ASSetRecord extends IRRRecord implements IRR.Record {
+export class ASSetRecord extends IRRObject implements as_set.Object {
 	public readonly type = "AS_SET" as IRR.Type.AS_SET;
+	declare public content: ASSetContent;
 
 	constructor(name: string, source: IRR.Source, content: ASSetContent, mnt_by?: IRR.mnter.reference[]) {
 		super(name, "AS_SET" as IRR.Type.AS_SET, source, content, mnt_by);

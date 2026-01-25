@@ -24,7 +24,7 @@ export namespace IRR {
 		internal = "internal",
 	}
 
-	export interface recordReference {
+	export interface objectReference {
 		name: string;
 		source?: Source;
 		remarks?: string[]; // Optional remarks for the reference, will show in RPSL when possible.
@@ -37,7 +37,7 @@ export namespace IRR {
 		toRPSL(): string;
 	}
 
-	export interface Record {
+	export interface Object {
 		name: string;
 		type: Type;
 		source: Source;
@@ -48,6 +48,6 @@ export namespace IRR {
 	}
 
 	export namespace mnter {
-		export interface reference extends recordReference {}
+		export interface reference extends objectReference {}
 	}
 }
