@@ -1,0 +1,9 @@
+{
+  "name": "mitei",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "author": "Bo Xu <xu.bo@sunoaki.net>",
+  "license": "MIT",
+  "private": true,
+  "type":"module"
+}
