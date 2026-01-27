@@ -10,9 +10,18 @@ export namespace IRRD {
 				members: string[] | null;
 			}>;
 		};
+
+		export type RpslObjectsMntBy = {
+			rpslObjects: Array<{
+				rpslPk?: string | null;
+				source?: string | null;
+				mntBy?: string[] | null;
+			}>;
+		};
 	}
 
 	export namespace Options {
+		export type Source = IRR.Source | IRR.Source[] | string | string[];
 		export interface client {
 			endpoint: string;
 			headers?: Record<string, string>;
@@ -22,7 +31,7 @@ export namespace IRRD {
 
 		export interface getASSet {
 			/** Optional filter for the AS-SET source (e.g. "RIPE", "RADB", "NTTCOM"). */
-			sources?: IRR.Source | IRR.Source[] | string | string[];
+			sources?: Source;
 
 			/**
 			 * Max recursion depth for member resolution.
@@ -32,6 +41,17 @@ export namespace IRRD {
 
 			/** Exclude these sets during recursion. */
 			excludeSets?: string[];
+		}
+
+		export interface getMntBy {
+			/** Restrict lookup to these IRRd sources. */
+			sources?: Source;
+
+			/** Optional objectClass filter (e.g. ["as-set"]). */
+			objectClass?: string[];
+
+			/** If set, force the `source` field on returned references to this value. */
+			refSourceOverride?: IRR.Source | string;
 		}
 	}
 }

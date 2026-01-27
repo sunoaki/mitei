@@ -3,6 +3,7 @@ import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client/core";
 import { IRRD as IRRDTypes } from "./types";
 
 import getASSetObject from "./methods/ASSetObject";
+import getMntBy from "./methods/MntBy";
 
 export default class IRRD {
 	private readonly client: ApolloClient;
@@ -31,7 +32,7 @@ export default class IRRD {
 	}
 
 	/**
-	 * Fetch an AS-SET's member ASNs from IRRd, and return a core ASSetObject.
+	 * Fetch an AS-SET's member ASNs from IRRd, and return a list of ASSetObject.
 	 *
 	 * Uses IRRd's specialised `recursiveSetMembers` query for performance.
 	 */
@@ -40,5 +41,17 @@ export default class IRRD {
 		options: IRRDTypes.Options.getASSet = {},
 	) {
 		return getASSetObject(this.client, setName, options);
+	}
+
+	/**
+	 * Query `mntBy` for a specific RPSL object and return IRR-style references.
+     * 
+     * Uses the `rpslObjects` query.
+	 */
+	public async getMntBy(
+		rpslPk: string,
+		options?: Parameters<typeof getMntBy>[2],
+	) {
+		return getMntBy(this.client, rpslPk, options);
 	}
 }

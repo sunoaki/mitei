@@ -1,16 +1,11 @@
+import type { ApolloClient } from "@apollo/client";
+import { gql } from "@apollo/client/core";
+
 import { IRRD as IRRDTypes } from "../types";
 import { ASSetContent, ASSetMember, ASSetObject } from "../../core/IRR/AS_SET";
 import * as tools from "../tools";
 
-import type { ApolloClient } from "@apollo/client";
-
-type RpslObjectsMntByResponse = {
-	rpslObjects: Array<{
-		rpslPk?: string | null;
-		source?: string | null;
-		mntBy?: string[] | null;
-	}>;
-};
+import getMntBy from "./MntBy";
 
 export function parseAsnToken(token: string): string | null {
 	const trimmed = token.trim();
@@ -21,6 +16,26 @@ export function parseAsnToken(token: string): string | null {
 	return trimmed.toUpperCase();
 }
 
+export const RECURSIVE_SET_MEMBERS_QUERY = gql`
+	query RecursiveSetMembers(
+		$setNames: [String!]!
+		$depth: Int
+		$sources: [String!]
+		$excludeSets: [String!]
+	) {
+		recursiveSetMembers(
+			setNames: $setNames
+			depth: $depth
+			sources: $sources
+			excludeSets: $excludeSets
+		) {
+			rpslPk
+			rootSource
+			members
+		}
+	}
+`;
+
 export default async function getASSetObject(
 	client: ApolloClient,
 	setName: string,
@@ -29,7 +44,7 @@ export default async function getASSetObject(
 	let sources = tools.normalizeSourceArg(options.sources);
 
 	const result = await client.query<IRRDTypes.Response.RecursiveSetMembers>({
-		query: tools.RECURSIVE_SET_MEMBERS_QUERY,
+		query: RECURSIVE_SET_MEMBERS_QUERY,
 		variables: {
 			setNames: [setName],
 			depth: options.depth,
@@ -62,19 +77,11 @@ export default async function getASSetObject(
 
 			const content = new ASSetContent(members);
 
-			// Fill mnt-by from the AS-SET object itself.
-			const mntByResult = await client.query<RpslObjectsMntByResponse>({
-				query: tools.RPSL_OBJECTS_MNT_BY_QUERY,
-				variables: {
-					rpslPk: [setName],
-					sources: sources,
-					objectClass: ["as-set"],
-				},
+			const mntBy = await getMntBy(client, setName, {
+				sources: source,
+				objectClass: ["as-set"],
+				refSourceOverride: chosen.rootSource,
 			});
-
-			const mntBy = (mntByResult.data?.rpslObjects?.[0]?.mntBy ?? [])
-				.filter((x): x is string => typeof x === "string" && x.length > 0)
-				.map((name) => ({ name, source: chosen.rootSource }));
 
 			return new ASSetObject(setName, source, content, mntBy);
 		}),
