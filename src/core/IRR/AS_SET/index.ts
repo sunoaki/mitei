@@ -1,7 +1,7 @@
 import { IRR } from "../types";
 import { as_set } from "./types";
 import IRRContent from "../base/content";
-import { IRRObject } from "../base/record";
+import { IRRObject } from "../base/object";
 import { inSource } from "../base/tools";
 import { isValidASNName, isValidASSETName } from "./validator";
 import { isRPSLName, INVALID_RPSL_NAME } from "../base/tools";
@@ -11,7 +11,9 @@ export const errorList = {
 	/** Error thrown when an invalid RPSL name is provided. */
 	INVALID_RPSL_NAME,
 	/** Error thrown when an invalid source is provided for an AS_SET member, We now support Source list in `IRR.Source` */
-	MEMBER_SOURCE_INVALID: new Error("Invalid source provided for AS_SET member."),
+	MEMBER_SOURCE_INVALID: new Error(
+		"Invalid source provided for AS_SET member.",
+	),
 	/** Error thrown when an invalid name is provided for an AS_SET member. */
 	MEMBER_NAME_INVALID: new Error("Invalid name provided for AS_SET member."),
 	/** Error thrown when an invalid name is provided for an AS_SET. */
@@ -48,9 +50,13 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 	// we simulate members as a set using an array.
 	public members: ASSetMember[];
 
-	constructor() {
+	constructor(members?: ASSetMember[]) {
 		super();
 		this.members = [];
+
+		for (const member of members || []) {
+			this.add(member);
+		}
 	}
 
 	/** Returns the index of a member in the members array, or -1 if not found. */
@@ -146,7 +152,12 @@ export class ASSetRecord extends IRRObject implements as_set.Object {
 	public readonly type = "AS_SET" as IRR.Type.AS_SET;
 	declare public content: ASSetContent;
 
-	constructor(name: string, source: IRR.Source, content: ASSetContent, mnt_by?: IRR.mnter.reference[]) {
+	constructor(
+		name: string,
+		source: IRR.Source,
+		content: ASSetContent,
+		mnt_by?: IRR.mnter.reference[],
+	) {
 		super(name, "AS_SET" as IRR.Type.AS_SET, source, content, mnt_by);
 
 		if (!isRPSLName(name)) {

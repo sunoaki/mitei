@@ -40,4 +40,6 @@ export class IRRObject implements IRR.Object {
 
 		return rpsl;
 	}
+
+	public toString = this.toRPSL;
 }

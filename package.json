@@ -5,5 +5,8 @@
   "author": "Bo Xu <xu.bo@sunoaki.net>",
   "license": "MIT",
   "private": true,
-  "type":"module"
+  "type": "module",
+  "dependencies": {
+    "uuid": "^13.0.0"
+  }
 }

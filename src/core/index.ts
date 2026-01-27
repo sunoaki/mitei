@@ -1,3 +1,3 @@
-class MiteiCore {
-
+class Mitei {
+	constructor() {}
 }
