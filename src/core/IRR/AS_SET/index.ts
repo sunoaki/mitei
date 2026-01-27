@@ -3,7 +3,7 @@ import { as_set } from "./types";
 import IRRContent from "../base/content";
 import { IRRObject } from "../base/object";
 import { inSource } from "../base/tools";
-import { isValidASNName, isValidASSETName } from "./validator";
+import { isValidASSetMemberName, isValidASSETName } from "./validator";
 import { isRPSLName, INVALID_RPSL_NAME } from "../base/tools";
 
 /** Error messages related to AS_SET members */
@@ -36,7 +36,7 @@ export class ASSetMember implements as_set.Member {
 			throw errorList.INVALID_RPSL_NAME;
 		}
 
-		if (!isValidASNName(name) && !isValidASSETName(name)) {
+		if (!isValidASSetMemberName(name)) {
 			throw errorList.MEMBER_NAME_INVALID;
 		}
 
@@ -72,8 +72,9 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 	}
 
 	/** Adds a member to the members array. */
-	add(member: ASSetMember) {
+	add(member: ASSetMember): void {
 		const index = this.index(member);
+
 		if (index === -1) {
 			this.members.push(member);
 		} else {
@@ -81,12 +82,16 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 		}
 	}
 
-	/** Removes a member from the members array. */
-	delete(member: ASSetMember) {
+	/** Removes a member from the members array. True means the member was removed, false means it was not found. */
+	delete(member: ASSetMember): boolean {
 		const index = this.index(member);
+
 		if (index !== -1) {
 			this.members.splice(index, 1);
+			return true;
 		}
+
+		return false;
 	}
 
 	/** Checks if this ASSetContent is equal to another. */
@@ -104,14 +109,34 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 		return true;
 	}
 
-	/** Returns a new ASSetContent with members in this but not in other. */
-	difference(other: ASSetContent): ASSetContent {
-		const result = new ASSetContent();
+	/** Returns a patch between this and another ASSetContent. */
+	diff(other: ASSetContent): as_set.Patch {
+		const added: ASSetMember[] = [];
+		const removed: ASSetMember[] = [];
 
+		for (const member of other.members) {
+			if (!this.has(member)) {
+				added.push(member);
+			}
+		}
 		for (const member of this.members) {
 			if (!other.has(member)) {
-				result.add(member);
+				removed.push(member);
 			}
+		}
+
+		return { added, removed };
+	}
+
+	/** Return a new ASSetContent with the patch applied */
+	patch(Patch: as_set.Patch): ASSetContent {
+		const result = new ASSetContent(this.members);
+
+		for (const member of Patch.added) {
+			result.add(member);
+		}
+		for (const member of Patch.removed) {
+			result.delete(member);
 		}
 
 		return result;
@@ -148,8 +173,8 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 	}
 }
 
-export class ASSetRecord extends IRRObject implements as_set.Object {
-	public readonly type = "AS_SET" as IRR.Type.AS_SET;
+export class ASSetObject extends IRRObject implements as_set.Object {
+	public readonly type = IRR.Type.AS_SET;
 	declare public content: ASSetContent;
 
 	constructor(
@@ -158,7 +183,7 @@ export class ASSetRecord extends IRRObject implements as_set.Object {
 		content: ASSetContent,
 		mnt_by?: IRR.mnter.reference[],
 	) {
-		super(name, "AS_SET" as IRR.Type.AS_SET, source, content, mnt_by);
+		super(name, IRR.Type.AS_SET, source, content, mnt_by);
 
 		if (!isRPSLName(name)) {
 			throw errorList.INVALID_RPSL_NAME;

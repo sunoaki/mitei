@@ -6,6 +6,17 @@ export function isValidASSETName(name: string): boolean {
 	return false;
 }
 
+/**
+ * AS-SET members can be ASNs, AS-SET names, or hierarchical combinations (e.g. AS47778:AS-SUNOAKI).
+ */
+export function isValidASSetMemberName(name: string): boolean {
+	const parts = name.split(":").filter((p) => p.length > 0);
+	if (parts.length === 0) {
+		return false;
+	}
+	return parts.every((p) => isValidASNName(p) || isValidASSETName(p));
+}
+
 export function isValidASNName(name: string): boolean {
 	if (name.startsWith("AS") && name.length > 2) {
 		const asnPart = name.slice(2);

@@ -57,8 +57,8 @@ console.log(
 	"\nRPSL representation of the union ASSetContent:\n\n" + union.toRPSL(),
 );
 
-// Testing ASSetRecord
-const asSetRecord = new asSet.ASSetRecord(
+// Testing ASSetObject
+const asSetObject = new asSet.ASSetObject(
 	"AS-EXAMPLE",
 	"RADB" as IRR.Source,
 	union,
@@ -66,5 +66,5 @@ const asSetRecord = new asSet.ASSetRecord(
 );
 
 console.log(
-	"\nRPSL representation of the ASSetRecord:\n\n" + asSetRecord.toRPSL(),
+	"\nRPSL representation of the ASSetObject:\n\n" + asSetObject.toRPSL(),
 );

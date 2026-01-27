@@ -5,7 +5,7 @@ import { IRR as IRRTypes } from "../types";
 const irr = new IRR();
 
 // Create AS_SET object
-const asSetObject = new asSet.ASSetRecord(
+const asSetObject = new asSet.ASSetObject(
 	"AS-EXAMPLE",
 	"RADB" as IRRTypes.Source,
 	new asSet.ASSetContent([

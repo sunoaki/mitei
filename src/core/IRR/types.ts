@@ -5,24 +5,44 @@ export namespace IRR {
 		ROUTE4 = "ROUTE4",
 		ROUTE6 = "ROUTE6",
 		ROUTE_SET = "ROUTE_SET",
-		ASN = "ASN",
-		AS_SET = "AS_SET",
+		ASN = "aut-num",
+		AS_SET = "as-set",
 	}
 
-	export enum Source {
-		ARIN = "ARIN",
-		RIPE = "RIPE",
-		APNIC = "APNIC",
-		LACNIC = "LACNIC",
-		AFRINIC = "AFRINIC",
-		RADB = "RADB",
-		ALTDB = "ALTDB",
+	/**
+	 * IRR sources are instance-defined strings (e.g. RIPE, RADB, NTTCOM).
+	 *
+	 * We keep a value object so existing code can continue to use `IRR.Source.RIPE`,
+	 * while the `IRR.Source` *type* is extensible to support unknown sources.
+	 */
+	export const Source = {
+		// Copy from rr.ntt.net and common IRR sources
+		NTTCOM: "NTTCOM",
+		LACNIC: "LACNIC",
+		IDNIC: "IDNIC",
+		RADB: "RADB",
+		RIPE: "RIPE",
+		"RIPE-NONAUTH": "RIPE-NONAUTH",
+		ALTDB: "ALTDB",
+		BELL: "BELL",
+		LEVEL3: "LEVEL3",
+		APNIC: "APNIC",
+		JPIRR: "JPIRR",
+		ARIN: "ARIN",
+		BBOI: "BBOI",
+		TC: "TC",
+		AFRINIC: "AFRINIC",
+		RPKI: "RPKI",
+		REGISTROBR: "REGISTROBR",
 
-		// Only used when source is not
-		undetermined = "undetermined",
-		// Only used when as a placeholder for internal records.
-		internal = "internal",
-	}
+		// Used when the upstream source string is missing/empty.
+		undetermined: "undetermined",
+		// Used as a placeholder for internal records.
+		internal: "internal",
+	} as const;
+
+	/** Extensible source type: known sources + any custom instance source string. */
+	export type Source = (typeof Source)[keyof typeof Source] | (string & {});
 
 	export interface objectReference {
 		name: string;
