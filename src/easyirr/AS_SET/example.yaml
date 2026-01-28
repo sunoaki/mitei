@@ -1,0 +1,28 @@
+name: example-content
+
+members:
+  - "AS47778"
+
+  - "AS30581":
+    remarks: "This AS is included for demonstration purposes."
+
+  - "AS-SUNOAKI":
+    flatten: true
+    depth: 2
+    source: ARIN
+    remarks:
+      - "This AS-SET is included to show nested AS-SET handling."
+
+  - type: AS-SET # means the same as "AS47778:AS-SELF"
+    value: "AS47778:AS-SELF"
+    flatten: true
+    depth: 1
+    source: RIPE
+    exclude:
+      - "AS200536"
+      - "AS-EXAMPLE":
+        flatten: true
+
+  - type: linked-content
+    value: "example-content"
+    remarks: "This linked content demonstrates referencing another AS-SET."

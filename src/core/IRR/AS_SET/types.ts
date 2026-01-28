@@ -21,16 +21,8 @@ export namespace as_set {
 	}
 
 	export interface Patch {
-		added: {
-			name: string;
-			source: IRR.Source;
-			remarks?: string[];
-		}[];
-		removed: {
-			name: string;
-			source: IRR.Source;
-			remarks?: string[];
-		}[];
+		added: Member[];
+		removed: Member[];
 	}
 
 	export interface Member extends IRR.mnter.reference {}
