@@ -4,6 +4,8 @@ export namespace as_set {
 	export interface Content extends IRR.Content {
 		members: Member[];
 
+
+		index(member: Member): number;
         has(member: Member): boolean;
         add(member: Member): void;
         delete(member: Member): boolean;

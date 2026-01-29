@@ -24,11 +24,11 @@ export const errorList = {
 
 export class ASSetMember implements as_set.Member {
 	public name: string;
-	public source: IRR.Source;
+	public source?: IRR.Source;
 	public remarks?: string[];
 
-	constructor(name: string, source: IRR.Source, remarks?: string[]) {
-		if (!inSource(source)) {
+	constructor(name: string, source?: IRR.Source, remarks?: string[]) {
+		if (!inSource(source) && source !== undefined) {
 			throw errorList.MEMBER_SOURCE_INVALID;
 		}
 
@@ -60,10 +60,18 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 	}
 
 	/** Returns the index of a member in the members array, or -1 if not found. */
-	private index(member: ASSetMember): number {
-		return this.members.findIndex(
+	index(member: ASSetMember): number {
+		let index = this.members.findIndex(
 			(m) => m.name === member.name && m.source === member.source,
 		);
+
+		if (index !== -1) return index;
+
+		index = this.members.findIndex(
+			(m) => m.name === member.name && !m.source && !member.source,
+		);
+
+		return index;
 	}
 
 	/** Returns true if the member exists in the members array. */
