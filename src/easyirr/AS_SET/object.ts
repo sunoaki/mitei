@@ -4,8 +4,19 @@ import { ASSetContent, ASSetObject } from "src/core/IRR/AS_SET";
 import { easy_as_set } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
+import type { IRR } from "src/core/IRR/types";
+
 export class EasyASSetObject extends ASSetObject implements easy_as_set.Object {
 	private readonly uuid = uuidv4;
+
+	constructor(
+		name: string,
+		source: IRR.Source,
+		content?: ASSetContent,
+		mnt_by?: IRR.mnter.reference[],
+	) {
+		super(name, source, content ?? new ASSetContent(), mnt_by);
+	}
 
 	patchList: as_set.Patch[] = [];
 
@@ -46,16 +57,16 @@ export class EasyASSetObject extends ASSetObject implements easy_as_set.Object {
 	}
 
 	/** Refresh the content by generate a patch from newer context to older, need  */
-	makePatch(contentUUID: string): as_set.Patch {
+	async makePatch(contentUUID: string): Promise<as_set.Patch> {
 		const registered = this.easyContents[contentUUID];
 		if (!registered) {
 			throw new Error(`Content UUID ${contentUUID} not registered.`);
 		}
 
-		const newContent = registered.content.toASSetContent();
+		const newContent = await registered.content.toASSetContent();
 		registered.lastRefreshed = new Date();
 
-		const patch = this.content.diff(newContent);
+		const patch = this.content.diff(newContent as ASSetContent);
 		this.patchList.push(patch);
 
 		registered.lastContent = newContent;
@@ -71,10 +82,12 @@ export class EasyASSetObject extends ASSetObject implements easy_as_set.Object {
 		this.patchList = [];
 	}
 
-	refreshAll(): void {
-		for (const contentUUID of Object.keys(this.easyContents)) {
-			this.makePatch(contentUUID);
-		}
+	async refreshAll(): Promise<void> {
+		await Promise.all(
+			Object.keys(this.easyContents).map(async (contentUUID) => {
+				await this.makePatch(contentUUID);
+			}),
+		);
 
 		this.applyPatches();
 	}

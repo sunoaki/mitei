@@ -4,17 +4,16 @@ export namespace as_set {
 	export interface Content extends IRR.Content {
 		members: Member[];
 
-
 		index(member: Member): number;
-        has(member: Member): boolean;
-        add(member: Member): void;
-        delete(member: Member): boolean;
+		has(member: Member): boolean;
+		add(member: Member): void;
+		delete(member: Member): boolean;
 
-        isEqual(other: Content): boolean;
-        diff(other: Content): Patch;
-        patch(patch: Patch): Content;
+		isEqual(other: Content): boolean;
+		diff(other: Content): Patch;
+		patch(patch: Patch): Content;
 
-        union(other: Content): Content;
+		union(other: Content): Content;
 	}
 
 	export interface Object extends IRR.Object {

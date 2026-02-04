@@ -68,19 +68,31 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 		if (index !== -1) return index;
 
 		index = this.members.findIndex(
-			(m) => m.name === member.name && !m.source && !member.source,
+			(m) => m.name === member.name && (!m.source || !member.source),
 		);
 
 		return index;
 	}
 
+	private makeMemberFromNumber(asn: number): ASSetMember {
+		return new ASSetMember(`AS${asn}`);
+	}
+
 	/** Returns true if the member exists in the members array. */
-	has(member: ASSetMember): boolean {
+	has(member: ASSetMember | number): boolean {
+		if(typeof member === "number") {
+			member = this.makeMemberFromNumber(member);
+		}
+
 		return this.index(member) !== -1;
 	}
 
 	/** Adds a member to the members array. */
-	add(member: ASSetMember): void {
+	add(member: ASSetMember | number): void {
+		if(typeof member === "number") {
+			member = this.makeMemberFromNumber(member);
+		}
+
 		const index = this.index(member);
 
 		if (index === -1) {
@@ -91,7 +103,11 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 	}
 
 	/** Removes a member from the members array. True means the member was removed, false means it was not found. */
-	delete(member: ASSetMember): boolean {
+	delete(member: ASSetMember | number): boolean {
+		if(typeof member === "number") {
+			member = this.makeMemberFromNumber(member);
+		}
+
 		const index = this.index(member);
 
 		if (index !== -1) {

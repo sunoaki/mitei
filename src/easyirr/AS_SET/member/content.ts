@@ -1,5 +1,5 @@
-import { easy_as_set } from '../types';
-import { ASSetContent } from 'src/core/IRR/AS_SET';
+import { easy_as_set } from "../types";
+import { ASSetContent } from "src/core/IRR/AS_SET";
 
 export class Content implements easy_as_set.Content {
 	type: "Content" = "Content";
@@ -13,11 +13,12 @@ export class Content implements easy_as_set.Content {
 		this.members = members;
 	}
 
-	toASSetContent(): ASSetContent {
-		const content = new ASSetContent();
+	async toASSetContent(): Promise<ASSetContent> {
+		let content = new ASSetContent();
 
 		for (const member of this.members) {
-			content.union(member.toASSetContent());
+			const memberContent = await member.toASSetContent();
+			content = content.union(memberContent);
 		}
 
 		return content;

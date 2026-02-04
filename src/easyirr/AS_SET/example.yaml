@@ -9,7 +9,7 @@ members:
   - "AS-SUNOAKI":
     flatten: true
     depth: 2
-    source: ARIN
+    sources: ARIN
     remarks:
       - "This AS-SET is included to show nested AS-SET handling."
 
@@ -17,12 +17,8 @@ members:
     value: "AS47778:AS-SELF"
     flatten: true
     depth: 1
-    source: RIPE
+    sources: RIPE
     exclude:
       - "AS200536"
       - "AS-EXAMPLE":
         flatten: true
-
-  - type: linked-content
-    value: "example-content"
-    remarks: "This linked content demonstrates referencing another AS-SET."

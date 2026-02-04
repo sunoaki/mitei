@@ -6,7 +6,7 @@ export namespace easy_as_set {
 		type: "AS_NUMBER" | "AS_SET" | "Content";
 
 		remarks?: string[];
-		toASSetContent(): as_set.Content;
+		toASSetContent(): as_set.Content | Promise<as_set.Content>;
 	}
 
 	export interface ASN_Member extends Member {
@@ -21,17 +21,20 @@ export namespace easy_as_set {
 		/** RPSL name for the AS-SET */
 		setName: string;
 
-		/** Source of the AS-SET information, both first query & flatten query, Used for IRRD. */
-		source: IRR.Source;
-
 		/** Whether to flatten the AS-SET */
 		flatten: boolean;
+
+		/** Sources of the AS-SET information, both first query & flatten query, Used for IRRD. */
+		sources?: IRR.Source[];
 
 		/** Only valid when flatten is true, Use -1 for unlimited depth */
 		depth?: number;
 
 		/** Excluded members from the AS-SET */
 		exclude?: Member[];
+
+		/** IRRD Server GraphQL URL */
+		irrdGraphQLEndpoint?: string;
 	}
 
 	export interface Content extends Member {
@@ -59,11 +62,53 @@ export namespace easy_as_set {
 		register(content: Content): string;
 		unregister(contentUUID: string): void;
 
-		makePatch(contentUUID: string): as_set.Patch;
+		makePatch(contentUUID: string): Promise<as_set.Patch>;
 		applyPatches(): void;
 
-		refreshAll(): void;
+		refreshAll(): Promise<void>;
 
 		clean(): void;
+	}
+
+	export namespace contentConf {
+
+		/** 
+		 * Member in string need be a RPSL-valid name,
+		 * number need be a valid ASN,
+		 * complexMember need be an object with type and corresponding properties.
+		 */
+		export type contextMember = string | number | complexMember;
+
+		export type complexMember = asnMember | omittedASNMember | asSetMember | omittedASSetMember;
+
+		export interface omittedASNMember {
+			[ASN: string]: any;
+			remarks?: string[];
+		}
+		export interface asnMember extends omittedASNMember {
+			type: "AS_NUMBER";
+			value: number;
+		}
+
+		export interface omittedASSetMember {
+			flatten: boolean;
+			depth: number;
+			sources?: IRR.Source[] | IRR.Source;
+			exclude?: contextMember[];
+			irrdGraphQLEndpoint?: string;
+			remarks?: string[];
+			[setName: string]: any;
+		}
+
+		export interface asSetMember extends omittedASSetMember {
+			type: "AS_SET";
+			value: string;
+		}
+
+		export interface context {
+			name: string;
+
+			members: contextMember[];
+		}
 	}
 }
