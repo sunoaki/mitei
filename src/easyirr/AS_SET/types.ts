@@ -71,37 +71,46 @@ export namespace easy_as_set {
 	}
 
 	export namespace contentConf {
-
-		/** 
+		/**
 		 * Member in string need be a RPSL-valid name,
 		 * number need be a valid ASN,
 		 * complexMember need be an object with type and corresponding properties.
 		 */
 		export type contextMember = string | number | complexMember;
 
-		export type complexMember = asnMember | omittedASNMember | asSetMember | omittedASSetMember;
+		export type complexMember =
+			| asnMember
+			| omittedASNMember
+			| asSetMember
+			| omittedASSetMember;
+
+		export interface ASNMemberOptions {
+			remarks?: string | string[];
+		}
 
 		export interface omittedASNMember {
-			[ASN: string]: any;
-			remarks?: string[];
+			[ASN: string]: ASNMemberOptions;
 		}
-		export interface asnMember extends omittedASNMember {
-			type: "AS_NUMBER";
+		export interface asnMember extends ASNMemberOptions {
+			type: "ASN";
 			value: number;
 		}
 
-		export interface omittedASSetMember {
+		export interface asSetMemberOptions {
 			flatten: boolean;
-			depth: number;
+			depth?: number;
 			sources?: IRR.Source[] | IRR.Source;
 			exclude?: contextMember[];
 			irrdGraphQLEndpoint?: string;
-			remarks?: string[];
-			[setName: string]: any;
+			remarks?: string | string[];
 		}
 
-		export interface asSetMember extends omittedASSetMember {
-			type: "AS_SET";
+		export interface omittedASSetMember {
+			[setName: string]: asSetMemberOptions;
+		}
+
+		export interface asSetMember extends asSetMemberOptions {
+			type: "AS-SET";
 			value: string;
 		}
 
@@ -112,3 +121,5 @@ export namespace easy_as_set {
 		}
 	}
 }
+
+export default easy_as_set;

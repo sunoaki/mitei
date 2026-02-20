@@ -4,21 +4,21 @@ members:
   - "AS47778"
 
   - "AS30581":
-    remarks: "This AS is included for demonstration purposes."
+      remarks: "This AS is included for demonstration purposes."
 
-  - "AS-SUNOAKI":
-    flatten: true
-    depth: 2
-    sources: ARIN
-    remarks:
-      - "This AS-SET is included to show nested AS-SET handling."
+  - "ARIN::AS-SUNOAKI":
+      flatten: true
+      depth: 2
+      sources: ARIN
+      remarks:
+        - "This AS-SET is included to show nested AS-SET."
+      exclude:
+        - "AS200536"
+        - "AS200536:AS-NET186":
+            flatten: true
 
   - type: AS-SET # means the same as "AS47778:AS-SELF"
     value: "AS47778:AS-SELF"
-    flatten: true
+    flatten: false
     depth: 1
     sources: RIPE
-    exclude:
-      - "AS200536"
-      - "AS-EXAMPLE":
-        flatten: true

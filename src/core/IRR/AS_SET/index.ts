@@ -210,15 +210,15 @@ export class ASSetObject extends IRRObject implements as_set.Object {
 		super(name, IRR.Type.AS_SET, source, content, mnt_by);
 
 		if (!isRPSLName(name)) {
-			throw errorList.INVALID_RPSL_NAME;
+			throw errorList.INVALID_RPSL_NAME + ` Received: ${name}`;
 		}
 
 		if (!isValidASSETName(name)) {
-			throw errorList.AS_SET_NAME_INVALID;
+			throw errorList.AS_SET_NAME_INVALID + ` Received: ${name}`;
 		}
 
 		if (!inSource(source)) {
-			throw errorList.MEMBER_SOURCE_INVALID;
+			throw errorList.MEMBER_SOURCE_INVALID + ` Received: ${source}`;
 		}
 	}
 }

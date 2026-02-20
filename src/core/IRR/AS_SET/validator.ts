@@ -1,4 +1,7 @@
 export function isValidASSETName(name: string): boolean {
+
+	name = name.split(":").length > 1 ? name.split(":").slice(-1)[0] : name;
+
 	if (name.startsWith("AS-") && name.length > 3) {
 		return true;
 	}
