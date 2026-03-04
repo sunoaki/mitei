@@ -70,4 +70,10 @@ export namespace IRR {
 	export namespace mnter {
 		export interface reference extends objectReference {}
 	}
+
+	export namespace contact {
+		export interface reference extends objectReference {
+			type: "admin-c" | "tech-c" | "zone-c" | "abuse-c" | "routing-c" | string; // Some IRR sources use custom contact types, so we allow any string here.
+		}
+	}
 }

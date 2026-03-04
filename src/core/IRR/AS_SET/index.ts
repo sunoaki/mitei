@@ -206,8 +206,11 @@ export class ASSetObject extends IRRObject implements as_set.Object {
 		source: IRR.Source,
 		content: ASSetContent,
 		mnt_by?: IRR.mnter.reference[],
+		contact?: IRR.contact.reference[],
+		created?: Date,
+		last_modified?: Date,
 	) {
-		super(name, IRR.Type.AS_SET, source, content, mnt_by);
+		super(name, IRR.Type.AS_SET, source, content, mnt_by, contact, created, last_modified);
 
 		if (!isRPSLName(name)) {
 			throw errorList.INVALID_RPSL_NAME + ` Received: ${name}`;
