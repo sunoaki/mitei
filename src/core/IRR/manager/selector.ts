@@ -1,20 +1,30 @@
 import { IRR as IRRTypes } from "../types";
 import IRRManager from "./manager";
 
-export default class IRRSelector {
-	private IRR: IRRManager;
-	private resultList: { [key: string]: IRRTypes.Object } = {};
+export default class IRRSelector<T extends IRRTypes.Object = IRRTypes.Object> {
+	private IRR: IRRManager<T>;
+	private resultList: { [key: string]: T } = {};
 
-	constructor(IRRManager: IRRManager) {
+	constructor(IRRManager: IRRManager<T>) {
 		this.IRR = IRRManager;
 		this.reset();
 	}
 
-	get results(): IRRTypes.Object[] {
+	get results(): T[] {
 		return Object.values(this.resultList);
 	}
 
-	reset(): IRRSelector {
+	get uuids(): string[] {
+		return Object.keys(this.resultList);
+	}
+
+	clone(): IRRSelector<T> {
+		const newIRRSelector: IRRSelector<T> = new IRRSelector(this.IRR);
+		newIRRSelector.resultList = { ...this.resultList };
+		return newIRRSelector;
+	}
+
+	reset(): IRRSelector<T> {
 		this.resultList = { ...this.IRR.registrations };
 		return this;
 	}
@@ -23,25 +33,24 @@ export default class IRRSelector {
 		this.resultList = {};
 	}
 
-	selectByName(name: string): IRRSelector {
-		const uuid = this.IRR.nameIndex[name];
+	selectByName(name: string): IRRSelector<T> {
+		const uuids = this.IRR.nameIndex[name];
 
-		if (uuid) {
-			if (this.resultList[uuid]) {
-				this.resultList = {
-					[uuid]: this.resultList[uuid],
-				};
-			} else {
-				this.clean();
-			}
-		} else {
+		if (!uuids) {
 			this.clean();
+			return this;
+		}
+
+		for (const uuid in this.resultList) {
+			if (!uuids.includes(uuid)) {
+				delete this.resultList[uuid];
+			}
 		}
 
 		return this;
 	}
 
-	selectBySource(source: IRRTypes.Source): IRRSelector {
+	selectBySource(source: IRRTypes.Source): IRRSelector<T> {
 		const uuids = this.IRR.sourceIndex[source];
 
 		if (!uuids) {
@@ -58,12 +67,12 @@ export default class IRRSelector {
 		return this;
 	}
 
-	selectByType(type: IRRTypes.Type): IRRSelector {
+	selectByType(type: IRRTypes.Type): IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]> {
 		const uuids = this.IRR.typeIndex[type];
 
 		if (!uuids) {
 			this.clean();
-			return this;
+			return this as unknown as IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]>;
 		}
 
 		for (const uuid in this.resultList) {
@@ -72,10 +81,10 @@ export default class IRRSelector {
 			}
 		}
 
-		return this;
+		return this as unknown as IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]>;
 	}
 
-	selectByUUIDs(uuids: string[]): IRRSelector {
+	selectByUUIDs(uuids: string[]): IRRSelector<T> {
 		const uuidSet = new Set(uuids);
 
 		for (const uuid in this.resultList) {

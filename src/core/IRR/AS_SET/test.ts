@@ -38,7 +38,7 @@ console.log(
 	asSetContent.isEqual(anotherAsSetContent),
 );
 
-const difference = asSetContent.difference(anotherAsSetContent);
+const difference = asSetContent.diff(anotherAsSetContent);
 console.log("\nDifference between the two ASSetContents:", difference.members);
 
 const union = asSetContent.union(anotherAsSetContent);

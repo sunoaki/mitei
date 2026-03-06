@@ -1,13 +1,18 @@
+import { ASSetObject } from "./AS_SET/types";
 export namespace IRR {
 	export enum Type {
-		IP4 = "IP4",
-		IP6 = "IP6",
-		ROUTE4 = "ROUTE4",
-		ROUTE6 = "ROUTE6",
-		ROUTE_SET = "ROUTE_SET",
-		ASN = "aut-num",
+		// IP4 = "IP4",
+		// IP6 = "IP6",
+		// ROUTE4 = "ROUTE4",
+		// ROUTE6 = "ROUTE6",
+		// ROUTE_SET = "ROUTE_SET",
+		// ASN = "aut-num",
 		AS_SET = "as-set",
 	}
+
+	export type TypeMap = {
+		[Type.AS_SET]: ASSetObject;
+	};
 
 	/**
 	 * IRR sources are instance-defined strings (e.g. RIPE, RADB, NTTCOM).
@@ -63,6 +68,9 @@ export namespace IRR {
 		source: Source;
 		content: Content;
 		mnt_by: mnter.reference[]; // Only references, we don't store full mntner objects here.
+		contact: contact.reference[]; // Only references, we don't store full contact objects here.
+		created: Date;
+		last_modified: Date;
 
 		toRPSL(): string;
 	}

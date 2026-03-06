@@ -79,6 +79,8 @@ export class EasyASSetObject extends ASSetObject implements easy_as_set.Object {
 			this.content = this.content.patch(patch);
 		}
 
+		this.last_modified = new Date();
+
 		this.patchList = [];
 	}
 

@@ -13,10 +13,10 @@ export const errorList = {
 	),
 };
 
-export default class IRR {
+export default class IRR<T extends IRRTypes.Object = IRRTypes.Object> {
 	/** use UUID as a key, Object as value */
-	public registrations: { [key: string]: IRRTypes.Object } = {};
-	public nameIndex: { [key: string]: string } = {}; // name to UUID
+	public registrations: { [key: string]: T } = {};
+	public nameIndex: { [key: string]: string[] } = {}; // name to UUID
 	public sourceIndex: { [key in IRRTypes.Source]?: string[] } = {}; // source to UUIDs
 	public typeIndex: { [key in IRRTypes.Type]?: string[] } = {}; // type to UUIDs
 
@@ -24,7 +24,7 @@ export default class IRR {
 		return uuidv4();
 	}
 
-	private isValidIRRObject(object: IRRTypes.Object): boolean {
+	private isValidIRRObject(object: T): boolean {
 		if (!isRPSLName(object.name)) {
 			throw INVALID_RPSL_NAME;
 		}
@@ -40,7 +40,10 @@ export default class IRR {
 		const object = this.registrations[uuid];
 
 		// name index
-		this.nameIndex[object.name] = uuid;
+		if (!this.nameIndex[object.name]) {
+			this.nameIndex[object.name] = [];
+		}
+		this.nameIndex[object.name]!.push(uuid);
 
 		// source index
 		if (!this.sourceIndex[object.source]) {
@@ -65,7 +68,7 @@ export default class IRR {
 		}
 	}
 
-	public register(object: IRRTypes.Object): string {
+	public register(object: T): string {
 		if (!this.isValidIRRObject(object)) {
 			throw errorList.INVALID_IRR_OBJECT;
 		}
@@ -85,11 +88,20 @@ export default class IRR {
 			return;
 		}
 
-        // do not update indexes here, rebuildIndex should be called after batch deletions
+		// do not update indexes here, rebuildIndex should be called after batch deletions
 		delete this.registrations[uuid];
 	}
 
-	get selector(): IRRSelector {
-		return new IRRSelector(this);
+	public replace(uuid: string, newObject: T): void {
+		if (!this.isValidIRRObject(newObject)) {
+			throw errorList.INVALID_IRR_OBJECT;
+		}
+
+		this.registrations[uuid] = newObject;
+		this.buildIndex(uuid);
+	}
+
+	get selector(): IRRSelector<T> {
+		return new IRRSelector<T>(this);
 	}
 }
