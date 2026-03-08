@@ -39,7 +39,7 @@ console.log(
 );
 
 const difference = asSetContent.diff(anotherAsSetContent);
-console.log('\nDifference between the two ASSetContents:', difference.members);
+console.log('\nDifference between the two ASSetContents:', difference);
 
 const union = asSetContent.union(anotherAsSetContent);
 console.log('\nUnion of the two ASSetContents:', union.members);
@@ -74,3 +74,11 @@ const asSetObject = new asSet.ASSetObject(
 console.log(
     '\nRPSL representation of the ASSetObject:\n\n' + asSetObject.toRPSL(),
 );
+
+const asSetObjectFromRPSL = asSet.ASSetObject.loadFromRPSL(asSetObject.toRPSL());
+console.log(asSetObjectFromRPSL.toRPSL())
+console.log(
+    '\nASSetObject created from RPSL is equal to original?',
+    asSetObject.content.isEqual(asSetObjectFromRPSL.content),
+);
+

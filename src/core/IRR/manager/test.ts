@@ -39,3 +39,16 @@ console.log('Deleted AS_SET with UUID:', asSetUUID);
 results = selector.reset().selectByType(IRRTypes.Type.AS_SET).results;
 
 console.log('Selector results after deletion (should be empty):', results);
+
+// test irr export / load
+
+console.log('Re-registered AS_SET with UUID:', irr.register(asSetObject));
+
+const exportedData = irr.export();
+console.log('Exported IRR data:', exportedData);
+
+const newIRR = new IRR();
+newIRR.load(exportedData);
+const loadedResults = newIRR.selector.selectByName('AS-EXAMPLE').results;
+
+console.log('Loaded IRR selector results for AS-EXAMPLE:', loadedResults[0].toRPSL());

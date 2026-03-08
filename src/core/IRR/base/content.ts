@@ -26,4 +26,23 @@ export default class IRRContent implements IRR.Content {
 
         return rpsl;
     }
+
+    static loadFromRPSL(rpsl: string): IRRContent {
+        const content = new IRRContent();
+        const lines = rpsl.split('\n');
+        for (const line of lines) {
+            const [key, ...rest] = line.split(':');
+            const value = rest.join(':').trim();
+
+            if (key === 'description') {
+                if (!content.descriptions) content.descriptions = [];
+                content.descriptions.push(value);
+            } else if (key === 'remarks') {
+                if (!content.remarks) content.remarks = [];
+                content.remarks.push(value);
+            }
+        }
+
+        return content;
+    }
 }

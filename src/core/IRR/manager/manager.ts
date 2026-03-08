@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import IRRSelector from './selector';
 
+import { ASSetObject } from '../AS_SET/index';
+
 export const errorList = {
     /** Error when the IRR Object is invalid */
     INVALID_IRR_OBJECT: new Error('Invalid IRR Object'),
@@ -96,6 +98,47 @@ export default class IRR<T extends IRRTypes.Object = IRRTypes.Object> {
 
         this.registrations[uuid] = newObject;
         this.buildIndex(uuid);
+    }
+
+    public export(): {
+        [uuid: string]: string;
+    } {
+        const exportData: { [uuid: string]: string } = {};
+        for (const uuid in this.registrations) {
+            exportData[uuid] = this.registrations[uuid].toRPSL();
+        }
+        return exportData;
+    }
+
+    public load(
+        data: { [uuid: string]: string },
+        objectClassMap: Partial<Record<keyof IRRTypes.TypeMap, IRRTypes.ObjectClass<any>>> = {
+            'as-set': ASSetObject,
+        },
+    ): void {
+        for (const uuid in data) {
+            const rpsl = data[uuid];
+            const typeMatch = rpsl.match(/^\s*([a-zA-Z-]+):/);
+            if (!typeMatch) {
+                throw new Error(`Invalid RPSL format for UUID ${uuid}`);
+            }
+            const type = typeMatch[1].toLowerCase() as IRRTypes.Type;
+
+            const ObjectClass = objectClassMap[type];
+            if (!ObjectClass) {
+                throw new Error(`Unsupported IRR object type: ${type}`);
+            }
+
+            try {
+                const object = ObjectClass.loadFromRPSL(rpsl);
+                this.registrations[uuid] = object;
+            }
+            catch (e) {
+                throw new Error(`Failed to load object for UUID ${uuid}: ${e}`);
+            }
+        }
+
+        this.rebuildIndex();
     }
 
     get selector(): IRRSelector<T> {

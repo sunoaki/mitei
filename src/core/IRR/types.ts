@@ -65,6 +65,11 @@ export namespace IRR {
         toRPSL(): string;
     }
 
+    /** Static parser contract for IRR content classes. */
+    export interface ContentClass<T extends Content = Content> {
+        loadFromRPSL(rpsl: string): T;
+    }
+
     export interface Object {
         name: string;
         type: Type;
@@ -76,6 +81,11 @@ export namespace IRR {
         last_modified: Date;
 
         toRPSL(): string;
+    }
+
+    /** Static parser contract for IRR object classes. */
+    export interface ObjectClass<T extends Object = Object> {
+        loadFromRPSL(rpsl: string): T;
     }
 
     export namespace mnter {

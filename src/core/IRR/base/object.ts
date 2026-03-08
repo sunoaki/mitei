@@ -70,4 +70,138 @@ export class IRRObject implements IRR.Object {
     }
 
     public toString = this.toRPSL;
+
+    protected static parseBaseFields(rpsl: string): {
+        name: string;
+        type: IRR.Type;
+        source: IRR.Source;
+        mnt_by: IRR.mnter.reference[];
+        contact: IRR.contact.reference[];
+        created?: Date;
+        last_modified?: Date;
+    } {
+        const parsed: {
+            name: string;
+            type: IRR.Type;
+            source: IRR.Source;
+            mnt_by: IRR.mnter.reference[];
+            contact: IRR.contact.reference[];
+            created?: Date;
+            last_modified?: Date;
+        } = {
+            name: '',
+            type: IRR.Type.AS_SET,
+            source: IRR.Source.undetermined,
+            mnt_by: [],
+            contact: [],
+        };
+
+        const pendingSourceByName = new Map<string, IRR.Source>();
+        let lastReference:
+            | IRR.mnter.reference
+            | IRR.contact.reference
+            | undefined;
+
+        const applyPendingSource = (
+            ref: IRR.mnter.reference | IRR.contact.reference,
+        ): void => {
+            const pendingSource = pendingSourceByName.get(ref.name);
+            if (pendingSource) {
+                ref.source = pendingSource;
+                pendingSourceByName.delete(ref.name);
+            }
+        };
+
+        const parseSourcedRemark = (
+            text: string,
+        ): { name: string; source: IRR.Source } | undefined => {
+            const match = text.match(/^(.+?)\s+sourced\s+from\s+(.+)$/i);
+            if (!match) return undefined;
+
+            return {
+                name: match[1].trim(),
+                source: match[2].trim() as IRR.Source,
+            };
+        };
+
+        for (const line of rpsl.split('\n')) {
+            const [key, ...rest] = line.split(':');
+            if (!key || rest.length === 0) continue;
+
+            const value = rest.join(':').trim();
+            if (!value) continue;
+
+            const normalizedKey = key.trim().toLowerCase();
+
+            switch (normalizedKey) {
+                case 'as-set':
+                    parsed.name = value;
+                    parsed.type = IRR.Type.AS_SET;
+                    lastReference = undefined;
+                    break;
+                case 'source':
+                    parsed.source = value as IRR.Source;
+                    lastReference = undefined;
+                    break;
+                case 'mnt-by': {
+                    const mntRef: IRR.mnter.reference = { name: value };
+                    applyPendingSource(mntRef);
+                    parsed.mnt_by.push(mntRef);
+                    lastReference = mntRef;
+                    break;
+                }
+                case 'created':
+                    parsed.created = new Date(value);
+                    lastReference = undefined;
+                    break;
+                case 'last-modified':
+                    parsed.last_modified = new Date(value);
+                    lastReference = undefined;
+                    break;
+                case 'admin-c':
+                case 'tech-c':
+                case 'zone-c':
+                case 'abuse-c':
+                case 'routing-c': {
+                    const contactRef: IRR.contact.reference = {
+                        type: normalizedKey,
+                        name: value,
+                    };
+                    applyPendingSource(contactRef);
+                    parsed.contact.push(contactRef);
+                    lastReference = contactRef;
+                    break;
+                }
+                case 'remarks': {
+                    const sourced = parseSourcedRemark(value);
+
+                    if (sourced) {
+                        if (lastReference && lastReference.name === sourced.name) {
+                            lastReference.source = sourced.source;
+                        } else {
+                            pendingSourceByName.set(sourced.name, sourced.source);
+                        }
+                        break;
+                    }
+
+                    if (!lastReference) {
+                        break;
+                    }
+
+                    if (!lastReference.remarks) {
+                        lastReference.remarks = [];
+                    }
+                    lastReference.remarks.push(value);
+                    break;
+                }
+                default:
+                    // Once we enter content/object-specific fields, stop
+                    // attaching following remarks to base references.
+                    lastReference = undefined;
+                    break;
+            }
+        }
+
+        return parsed;
+    }
 }

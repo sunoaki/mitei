@@ -1,7 +1,8 @@
 export function isValidASSETName(name: string): boolean {
     name = name.split(':').length > 1 ? name.split(':').slice(-1)[0] : name;
+    const normalizedName = name.toUpperCase();
 
-    if (name.startsWith('AS-') && name.length > 3) {
+    if (normalizedName.startsWith('AS-') && normalizedName.length > 3) {
         return true;
     }
 
@@ -20,8 +21,10 @@ export function isValidASSetMemberName(name: string): boolean {
 }
 
 export function isValidASNName(name: string): boolean {
-    if (name.startsWith('AS') && name.length > 2) {
-        const asnPart = name.slice(2);
+    const normalizedName = name.toUpperCase();
+
+    if (normalizedName.startsWith('AS') && normalizedName.length > 2) {
+        const asnPart = normalizedName.slice(2);
         const asnNumber = parseInt(asnPart, 10);
         return !isNaN(asnNumber) && asnNumber >= 0 && asnNumber <= 4294967295;
     }

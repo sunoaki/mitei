@@ -47,8 +47,8 @@ export default class IRRSelector<T extends IRRTypes.Object = IRRTypes.Object> {
         this.count++;
 
         const uuids = Array.isArray(name)
-            ? name.flatMap((n) => this.IRR.nameIndex[n])
-            : this.IRR.nameIndex[name];
+            ? name.flatMap((n) => this.IRR.nameIndex[n.toLowerCase()])
+            : this.IRR.nameIndex[name.toLowerCase()];
 
         if (!uuids) {
             this.clean();

@@ -197,6 +197,89 @@ export class ASSetContent extends IRRContent implements as_set.Content {
 
         return rpsl;
     }
+
+    static loadFromRPSL(rpsl: string): ASSetContent {
+        const content = new ASSetContent();
+        const pendingMemberSourceByName = new Map<string, IRR.Source>();
+        let inContentSection = false;
+        let lastMember: ASSetMember | undefined;
+
+        const parseSourcedRemark = (
+            text: string,
+        ): { name: string; source: IRR.Source } | undefined => {
+            const match = text.match(/^(.+?)\s+sourced\s+from\s+(.+)$/i);
+            if (!match) return undefined;
+            return {
+                name: match[1].trim(),
+                source: match[2].trim() as IRR.Source,
+            };
+        };
+
+        const lines = rpsl.split('\n');
+        for (const line of lines) {
+            const [key, ...rest] = line.split(':');
+            if (!key || rest.length === 0) continue;
+
+            const normalizedKey = key.trim().toLowerCase();
+            const value = rest.join(':').trim();
+            if (!value) continue;
+
+            if (normalizedKey === 'description' || normalizedKey === 'members') {
+                inContentSection = true;
+            }
+
+            if (!inContentSection) {
+                continue;
+            }
+
+            if (normalizedKey === 'description') {
+                if (!content.descriptions) content.descriptions = [];
+                content.descriptions.push(value);
+                lastMember = undefined;
+                continue;
+            }
+
+            if (normalizedKey === 'members') {
+                const source = pendingMemberSourceByName.get(value);
+                if (source) {
+                    pendingMemberSourceByName.delete(value);
+                }
+
+                const member = new ASSetMember(value, source);
+                content.add(member);
+                lastMember = member;
+                continue;
+            }
+
+            if (normalizedKey === 'remarks') {
+                const sourced = parseSourcedRemark(value);
+
+                if (sourced) {
+                    if (lastMember && lastMember.name === sourced.name) {
+                        lastMember.source = sourced.source;
+                    } else {
+                        pendingMemberSourceByName.set(
+                            sourced.name,
+                            sourced.source,
+                        );
+                    }
+                    continue;
+                }
+
+                if (lastMember) {
+                    if (!lastMember.remarks) {
+                        lastMember.remarks = [];
+                    }
+                    lastMember.remarks.push(value);
+                } else {
+                    if (!content.remarks) content.remarks = [];
+                    content.remarks.push(value);
+                }
+            }
+        }
+
+        return content;
+    }
 }
 
 export class ASSetObject extends IRRObject implements as_set.Object {
@@ -234,5 +317,24 @@ export class ASSetObject extends IRRObject implements as_set.Object {
         if (!inSource(source)) {
             throw errorList.MEMBER_SOURCE_INVALID + ` Received: ${source}`;
         }
+    }
+
+    static loadFromRPSL(rpsl: string): ASSetObject {
+        const parsed = IRRObject.parseBaseFields(rpsl);
+        const content = ASSetContent.loadFromRPSL(rpsl);
+
+        return new ASSetObject(
+            parsed.name,
+            parsed.source,
+            content,
+            parsed.mnt_by,
+            parsed.contact,
+            parsed.created,
+            parsed.last_modified,
+        );
+    }
+
+    static fromRPSL(rpsl: string): ASSetObject {
+        return ASSetObject.loadFromRPSL(rpsl);
     }
 }
