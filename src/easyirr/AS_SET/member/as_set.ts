@@ -28,7 +28,7 @@ export interface ASSetMemberOptions {
 }
 
 export class AS_SET_Member implements easy_as_set.AS_SET_Member {
-    type: 'AS_SET' = 'AS_SET';
+    type = 'AS_SET' as const;
 
     setName: string;
     flatten: boolean;

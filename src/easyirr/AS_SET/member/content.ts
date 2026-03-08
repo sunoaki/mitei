@@ -2,7 +2,7 @@ import { easy_as_set } from '../types';
 import { ASSetContent } from 'src/core/IRR/AS_SET';
 
 export class Content implements easy_as_set.Content {
-    type: 'Content' = 'Content';
+    type = 'Content' as const;
 
     contentName: string;
 

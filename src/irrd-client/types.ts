@@ -1,6 +1,8 @@
 import type { FetchPolicy } from '@apollo/client/core';
 import { IRR } from '../core/IRR/types';
 
+/* eslint-disable @typescript-eslint/no-namespace */
+
 export namespace IRRD {
     export namespace Response {
         export type RecursiveSetMembers = {

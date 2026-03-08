@@ -3,7 +3,7 @@ import { as_set } from 'src/core/IRR/AS_SET/types';
 import { ASSetContent, ASSetMember } from 'src/core/IRR/AS_SET';
 
 export class ASN_Member implements easy_as_set.ASN_Member {
-    type: 'AS_NUMBER' = 'AS_NUMBER';
+    type = 'AS_NUMBER' as const;
 
     asn: number;
     remarks?: string[];

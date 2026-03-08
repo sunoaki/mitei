@@ -1,4 +1,7 @@
 import { ASSetObject } from './AS_SET/types';
+
+/* eslint-disable @typescript-eslint/no-namespace */
+
 export namespace IRR {
     export enum Type {
         // IP4 = "IP4",
@@ -76,7 +79,7 @@ export namespace IRR {
     }
 
     export namespace mnter {
-        export interface reference extends objectReference {}
+        export type reference = objectReference;
     }
 
     export namespace contact {

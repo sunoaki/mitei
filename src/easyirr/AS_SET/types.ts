@@ -1,6 +1,8 @@
 import { as_set } from 'src/core/IRR/AS_SET/types';
 import { IRR } from 'src/core/IRR/types';
 
+/* eslint-disable @typescript-eslint/no-namespace */
+
 export namespace easy_as_set {
     export interface Member {
         type: 'AS_NUMBER' | 'AS_SET' | 'Content';

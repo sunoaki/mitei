@@ -1,5 +1,7 @@
 import { IRR } from '../types';
 
+/* eslint-disable @typescript-eslint/no-namespace */
+
 export interface ASSetPatch {
     added: ASSetMember[];
     removed: ASSetMember[];
@@ -24,7 +26,7 @@ export interface ASSetObject extends IRR.Object {
     content: ASSetContent;
 }
 
-export interface ASSetMember extends IRR.mnter.reference {}
+export type ASSetMember = IRR.mnter.reference;
 export namespace as_set {
     export type Object = ASSetObject;
     export type Content = ASSetContent;

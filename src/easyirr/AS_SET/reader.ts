@@ -105,17 +105,22 @@ export function parseMember(
 
         switch (type) {
             case 'ASN':
-                if (typeof value === 'number')
+                if (typeof value === 'number') {
                     baseMember = new ASN_Member(value);
-                if (typeof value === 'string' && value.startsWith('AS')) {
+                } else if (
+                    typeof value === 'string' &&
+                    value.startsWith('AS')
+                ) {
                     const asn = parseInt(value.slice(2));
                     if (isNaN(asn))
                         throw new Error(`Invalid AS_NUMBER value: ${value}`);
                     baseMember = new ASN_Member(asn);
-                } else throw new Error(`Invalid AS_NUMBER value: ${value}`);
+                } else {
+                    throw new Error(`Invalid AS_NUMBER value: ${value}`);
+                }
                 return finishMemberWithDetails(baseMember, memberValue);
 
-            case 'AS-SET':
+            case 'AS-SET': {
                 if (typeof value !== 'string') {
                     throw new Error(`Invalid AS_SET value: ${value}`);
                 }
@@ -130,6 +135,7 @@ export function parseMember(
                     flatten: false,
                 });
                 return finishMemberWithDetails(baseMember, memberValue);
+            }
 
             default:
                 throw new Error(`Unsupported member type: ${type}`);
