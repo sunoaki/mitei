@@ -3,7 +3,7 @@ import { as_set } from 'src/core/IRR/AS_SET/types';
 import { ASSetContent, ASSetMember } from 'src/core/IRR/AS_SET';
 
 export class ASN_Member implements easy_as_set.ASN_Member {
-    type: "AS_NUMBER" = "AS_NUMBER";
+    type: 'AS_NUMBER' = 'AS_NUMBER';
 
     asn: number;
     remarks?: string[];
@@ -14,7 +14,11 @@ export class ASN_Member implements easy_as_set.ASN_Member {
     }
 
     toASSetContent(): as_set.Content {
-        const member = new ASSetMember(`AS${this.asn}`, "undetermined", this.remarks);
+        const member = new ASSetMember(
+            `AS${this.asn}`,
+            'undetermined',
+            this.remarks,
+        );
         const content = new ASSetContent([member]);
         return content;
     }

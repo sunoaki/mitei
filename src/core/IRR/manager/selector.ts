@@ -1,97 +1,133 @@
-import { IRR as IRRTypes } from "../types";
-import IRRManager from "./manager";
+import { IRR as IRRTypes } from '../types';
+import IRRManager from './manager';
 
 export default class IRRSelector<T extends IRRTypes.Object = IRRTypes.Object> {
-	private IRR: IRRManager<T>;
-	private resultList: { [key: string]: T } = {};
+    private IRR: IRRManager<T>;
+    private resultList: { [key: string]: T } = {};
+    private count: number = 0;
 
-	constructor(IRRManager: IRRManager<T>) {
-		this.IRR = IRRManager;
-		this.reset();
-	}
+    constructor(IRRManager: IRRManager<T>) {
+        this.IRR = IRRManager;
+        this.reset();
+    }
 
-	get results(): T[] {
-		return Object.values(this.resultList);
-	}
+    get results(): T[] {
+        return Object.values(this.resultList);
+    }
 
-	get uuids(): string[] {
-		return Object.keys(this.resultList);
-	}
+    get uuids(): string[] {
+        return Object.keys(this.resultList);
+    }
 
-	clone(): IRRSelector<T> {
-		const newIRRSelector: IRRSelector<T> = new IRRSelector(this.IRR);
-		newIRRSelector.resultList = { ...this.resultList };
-		return newIRRSelector;
-	}
+    get resultsMap(): { [key: string]: T } {
+        return this.resultList;
+    }
 
-	reset(): IRRSelector<T> {
-		this.resultList = { ...this.IRR.registrations };
-		return this;
-	}
+    get queryTimes(): number {
+        return this.count;
+    }
 
-	private clean(): void {
-		this.resultList = {};
-	}
+    clone(): IRRSelector<T> {
+        const newIRRSelector: IRRSelector<T> = new IRRSelector(this.IRR);
+        newIRRSelector.resultList = { ...this.resultList };
+        return newIRRSelector;
+    }
 
-	selectByName(name: string): IRRSelector<T> {
-		const uuids = this.IRR.nameIndex[name];
+    reset(): IRRSelector<T> {
+        this.resultList = { ...this.IRR.registrations };
+        this.count = 0;
+        return this;
+    }
 
-		if (!uuids) {
-			this.clean();
-			return this;
-		}
+    private clean(): void {
+        this.resultList = {};
+    }
 
-		for (const uuid in this.resultList) {
-			if (!uuids.includes(uuid)) {
-				delete this.resultList[uuid];
-			}
-		}
+    selectByName(name: string | string[]): IRRSelector<T> {
+        this.count++;
 
-		return this;
-	}
+        const uuids = Array.isArray(name)
+            ? name.flatMap((n) => this.IRR.nameIndex[n])
+            : this.IRR.nameIndex[name];
 
-	selectBySource(source: IRRTypes.Source): IRRSelector<T> {
-		const uuids = this.IRR.sourceIndex[source];
+        if (!uuids) {
+            this.clean();
+            return this;
+        }
 
-		if (!uuids) {
-			this.clean();
-			return this;
-		}
+        for (const uuid in this.resultList) {
+            if (!uuids.includes(uuid)) {
+                delete this.resultList[uuid];
+            }
+        }
 
-		for (const uuid in this.resultList) {
-			if (!uuids.includes(uuid)) {
-				delete this.resultList[uuid];
-			}
-		}
+        return this;
+    }
 
-		return this;
-	}
+    selectBySource(
+        source: IRRTypes.Source | IRRTypes.Source[],
+    ): IRRSelector<T> {
+        this.count++;
 
-	selectByType(type: IRRTypes.Type): IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]> {
-		const uuids = this.IRR.typeIndex[type];
+        const uuids = Array.isArray(source)
+            ? source.flatMap((s) => this.IRR.sourceIndex[s])
+            : this.IRR.sourceIndex[source];
 
-		if (!uuids) {
-			this.clean();
-			return this as unknown as IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]>;
-		}
+        if (!uuids) {
+            this.clean();
+            return this;
+        }
 
-		for (const uuid in this.resultList) {
-			if (!uuids.includes(uuid)) {
-				delete this.resultList[uuid];
-			}
-		}
+        for (const uuid in this.resultList) {
+            if (!uuids.includes(uuid)) {
+                delete this.resultList[uuid];
+            }
+        }
 
-		return this as unknown as IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]>;
-	}
+        return this;
+    }
 
-	selectByUUIDs(uuids: string[]): IRRSelector<T> {
-		const uuidSet = new Set(uuids);
+    selectByType(
+        type: IRRTypes.Type | IRRTypes.Type[],
+    ): IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]> {
+        this.count++;
 
-		for (const uuid in this.resultList) {
-			if (!uuidSet.has(uuid)) {
-				delete this.resultList[uuid];
-			}
-		}
-		return this;
-	}
+        const uuids = Array.isArray(type)
+            ? type.flatMap((t) => this.IRR.typeIndex[t])
+            : this.IRR.typeIndex[type];
+
+        if (!uuids) {
+            this.clean();
+            return this as unknown as IRRSelector<
+                IRRTypes.TypeMap[IRRTypes.Type]
+            >;
+        }
+
+        for (const uuid in this.resultList) {
+            if (!uuids.includes(uuid)) {
+                delete this.resultList[uuid];
+            }
+        }
+
+        return this as unknown as IRRSelector<IRRTypes.TypeMap[IRRTypes.Type]>;
+    }
+
+    selectByUUIDs(uuids: string[]): IRRSelector<T> {
+        this.count++;
+
+        const uuidSet = new Set(uuids);
+
+        if (!uuidSet) {
+            this.clean();
+            return this;
+        }
+
+        for (const uuid in this.resultList) {
+            if (!uuidSet.has(uuid)) {
+                delete this.resultList[uuid];
+            }
+        }
+
+        return this;
+    }
 }
