@@ -132,9 +132,10 @@ export default class IRR<T extends IRRTypes.Object = IRRTypes.Object> {
             try {
                 const object = ObjectClass.loadFromRPSL(rpsl);
                 this.registrations[uuid] = object;
-            }
-            catch (e) {
-                throw new Error(`Failed to load object for UUID ${uuid}: ${e}`);
+            } catch (error: unknown) {
+                throw new Error(`Failed to load object for UUID ${uuid}`, {
+                    cause: error,
+                });
             }
         }
 

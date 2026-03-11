@@ -167,7 +167,7 @@ export class ASSetContent extends IRRContent implements as_set.Content {
     }
 
     /** Returns a new ASSetContent with members in either this or other. */
-    union(other: ASSetContent): ASSetContent {
+    union(other: as_set.Content): ASSetContent {
         const result = new ASSetContent();
 
         for (const member of this.members) {
