@@ -22,7 +22,7 @@
         "experimentalDecorators": true,
         "resolveJsonModule": false,
         "moduleResolution": "node",
-        "types": ["node"],
+        "types": ["node", "jest"],
         "outDir": "./out",
         "rootDir": "./src",
         "baseUrl": ".",
@@ -30,6 +30,6 @@
             "src/*": ["src/*"]
         }
     },
-    "exclude": ["node_modules"],
+    "exclude": ["node_modules", "out"],
     "include": ["./src/**/*.ts", "./src/**/*.d.ts"]
 }

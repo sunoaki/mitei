@@ -4,7 +4,19 @@ import tseslint from 'typescript-eslint';
 
 export default [
     { files: ['src/**/*.{js,mjs,cjs,ts}', 'test/**/*.{js,mjs,cjs,ts}'] },
-    { languageOptions: { globals: globals.browser } },
+    {
+        files: ['src/**/*.{js,mjs,cjs,ts}'],
+        languageOptions: { globals: { ...globals.browser, ...globals.node } },
+    },
+    {
+        files: ['src/**/__tests__/**/*.{js,mjs,cjs,ts}', 'test/**/*.{js,mjs,cjs,ts}'],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                ...globals.jest,
+            },
+        },
+    },
     pluginJs.configs.recommended,
     ...tseslint.configs.recommended,
     {
