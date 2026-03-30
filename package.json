@@ -5,6 +5,7 @@
     "author": "Bo Xu <xu.bo@sunoaki.net>",
     "license": "MIT",
     "private": true,
+    "packageManager": "yarn@1.22.22",
     "type": "module",
     "dependencies": {
         "@apollo/client": "^4.1.2",
@@ -29,7 +30,9 @@
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.5",
         "globals": "^17.4.0",
+        "husky": "^9.1.7",
         "jest": "^30.2.0",
+        "lint-staged": "^16.2.1",
         "prettier": "^3.8.1",
         "ts-jest": "^29.4.4",
         "tsx": "^4.21.0",
@@ -39,9 +42,19 @@
         "build": "tsc -p tsconfig.build.json",
         "format": "prettier --write \"**/*.{ts,json,md}\" ",
         "lint": "eslint \"src/**/*.ts\" --fix",
+        "prepare": "husky",
+        "precommit": "lint-staged && yarn run test:related",
         "test": "jest",
+        "test:related": "node ./scripts/run-related-tests.mjs",
         "test:ci": "jest --runInBand --ci --coverage",
         "test:coverage": "jest --coverage",
         "test:watch": "jest --watch"
+    },
+    "lint-staged": {
+        "*.{json,md}": "prettier --write",
+        "src/**/*.ts": [
+            "prettier --write",
+            "eslint --fix"
+        ]
     }
 }

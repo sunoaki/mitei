@@ -7,7 +7,9 @@ describe('easyirr schema assertions', () => {
             members: ['AS65001', 65002],
         };
 
-        expect(() => assertValid(contentSchema, valid, 'content format')).not.toThrow();
+        expect(() =>
+            assertValid(contentSchema, valid, 'content format'),
+        ).not.toThrow();
     });
 
     test('assertValid reports path when schema fails', () => {
@@ -16,8 +18,8 @@ describe('easyirr schema assertions', () => {
             members: [{}],
         };
 
-        expect(() => assertValid(contentSchema, invalid, 'content format')).toThrow(
-            /Invalid content format: \$.+/,
-        );
+        expect(() =>
+            assertValid(contentSchema, invalid, 'content format'),
+        ).toThrow(/Invalid content format: \$.+/);
     });
 });

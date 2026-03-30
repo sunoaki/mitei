@@ -49,9 +49,7 @@ export function generateMemberByName(member: unknown): easy_as_set.Member {
     }
 }
 
-export function parseMember(
-    member: unknown,
-): easy_as_set.Member {
+export function parseMember(member: unknown): easy_as_set.Member {
     if (['number', 'string'].includes(typeof member)) {
         return generateMemberByName(member);
     }
@@ -68,7 +66,11 @@ export function parseMember(
         };
 
         if (baseMember instanceof ASN_Member) {
-            assertValid(asnMemberOptionsSchema, memberValue, 'ASN member options');
+            assertValid(
+                asnMemberOptionsSchema,
+                memberValue,
+                'ASN member options',
+            );
             if ('remarks' in memberValue)
                 baseMember.remarks = normalizeRemarks(memberValue?.remarks);
             return baseMember;

@@ -16,7 +16,9 @@ export const asSetMemberOptionsSchema = Type.Object(
     {
         flatten: Type.Optional(Type.Boolean()),
         depth: Type.Optional(Type.Number()),
-        sources: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),
+        sources: Type.Optional(
+            Type.Union([Type.String(), Type.Array(Type.String())]),
+        ),
         exclude: Type.Optional(Type.Array(Type.Any())),
         irrdGraphQLEndpoint: Type.Optional(Type.String()),
         remarks: Type.Optional(remarksSchema),
@@ -45,7 +47,9 @@ export const typedASSETMemberSchema = Type.Object(
         value: Type.String(),
         flatten: Type.Optional(Type.Boolean()),
         depth: Type.Optional(Type.Number()),
-        sources: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),
+        sources: Type.Optional(
+            Type.Union([Type.String(), Type.Array(Type.String())]),
+        ),
         exclude: Type.Optional(Type.Array(Type.Any())),
         irrdGraphQLEndpoint: Type.Optional(Type.String()),
         remarks: Type.Optional(remarksSchema),
@@ -100,9 +104,7 @@ export function assertValid<Schema extends TSchema>(
     }
 
     const [firstError] = Value.Errors(schema, value);
-    const path = firstError?.instancePath
-        ? `$${firstError.instancePath}`
-        : '$';
+    const path = firstError?.instancePath ? `$${firstError.instancePath}` : '$';
     const message = firstError?.message ?? 'schema validation failed';
 
     throw new Error(`Invalid ${label}: ${path} ${message}`);

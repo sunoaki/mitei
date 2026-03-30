@@ -27,8 +27,12 @@ describe('irrd-client getASSetObject', () => {
 
     test('maps recursiveSetMembers response to ASSetObject and sorts by preferred source', async () => {
         mockedGetMntBy
-            .mockResolvedValueOnce([{ name: 'MNT-RIPE', source: IRR.Source.RIPE }])
-            .mockResolvedValueOnce([{ name: 'MNT-RADB', source: IRR.Source.RADB }]);
+            .mockResolvedValueOnce([
+                { name: 'MNT-RIPE', source: IRR.Source.RIPE },
+            ])
+            .mockResolvedValueOnce([
+                { name: 'MNT-RADB', source: IRR.Source.RADB },
+            ]);
 
         const client = {
             query: jest.fn().mockResolvedValue({
@@ -66,20 +70,29 @@ describe('irrd-client getASSetObject', () => {
         });
 
         expect(mockedGetMntBy).toHaveBeenCalledTimes(2);
-        expect(mockedGetMntBy).toHaveBeenNthCalledWith(1, client, 'AS-EXAMPLE', {
-            sources: IRR.Source.RIPE,
-            objectClass: ['as-set'],
-            refSourceOverride: 'RIPE',
-        });
+        expect(mockedGetMntBy).toHaveBeenNthCalledWith(
+            1,
+            client,
+            'AS-EXAMPLE',
+            {
+                sources: IRR.Source.RIPE,
+                objectClass: ['as-set'],
+                refSourceOverride: 'RIPE',
+            },
+        );
 
         expect(result).toHaveLength(2);
         expect(result[0].source).toBe(IRR.Source.RADB);
-        expect(result[0].mnt_by).toEqual([{ name: 'MNT-RADB', source: IRR.Source.RADB }]);
+        expect(result[0].mnt_by).toEqual([
+            { name: 'MNT-RADB', source: IRR.Source.RADB },
+        ]);
 
         expect(result[1].source).toBe(IRR.Source.RIPE);
         expect(result[1].content.has(65010)).toBe(true);
         expect(result[1].content.has(65011)).toBe(true);
-        expect(result[1].content.members.some((m) => m.name === 'INVALID TOKEN')).toBe(false);
+        expect(
+            result[1].content.members.some((m) => m.name === 'INVALID TOKEN'),
+        ).toBe(false);
     });
 
     test('throws when AS-SET is not found', async () => {

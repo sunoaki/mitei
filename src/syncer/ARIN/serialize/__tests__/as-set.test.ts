@@ -38,13 +38,22 @@ describe('ARIN AS-SET XML serializer', () => {
 
         expect(object.name).toBe('as-example-arin');
         expect(object.source).toBe(IRR.Source.ARIN);
-        expect(object.mnt_by[0]).toEqual({ name: 'EXAMPLEORG', source: IRR.Source.ARIN });
+        expect(object.mnt_by[0]).toEqual({
+            name: 'EXAMPLEORG',
+            source: IRR.Source.ARIN,
+        });
         expect(object.contact).toEqual([
             { name: 'TECH-HDL', type: 'tech-c', source: IRR.Source.ARIN },
             { name: 'ADMIN-HDL', type: 'admin-c', source: IRR.Source.ARIN },
         ]);
-        expect(object.content.members.map((m) => m.name)).toEqual(['AS65001', 'AS65002']);
-        expect(object.content.descriptions).toEqual(['first line', 'second line']);
+        expect(object.content.members.map((m) => m.name)).toEqual([
+            'AS65001',
+            'AS65002',
+        ]);
+        expect(object.content.descriptions).toEqual([
+            'first line',
+            'second line',
+        ]);
     });
 
     test('xmlToASSetObject throws for invalid payload and missing name', () => {
@@ -53,7 +62,9 @@ describe('ARIN AS-SET XML serializer', () => {
         );
 
         expect(() =>
-            xmlToASSetObject('<asSet><source>ARIN</source><name>   </name></asSet>'),
+            xmlToASSetObject(
+                '<asSet><source>ARIN</source><name>   </name></asSet>',
+            ),
         ).toThrow(/missing <name> value/);
     });
 
@@ -69,7 +80,11 @@ describe('ARIN AS-SET XML serializer', () => {
             [
                 { type: 'admin-c', name: 'ADMIN-HDL', source: IRR.Source.ARIN },
                 { type: 'tech-c', name: 'TECH-HDL', source: IRR.Source.ARIN },
-                { type: 'routing-c', name: 'ROUTE-HDL', source: IRR.Source.ARIN },
+                {
+                    type: 'routing-c',
+                    name: 'ROUTE-HDL',
+                    source: IRR.Source.ARIN,
+                },
             ],
             new Date('2024-01-01T00:00:00.000Z'),
             new Date('2024-01-02T00:00:00.000Z'),

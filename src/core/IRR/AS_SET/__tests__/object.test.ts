@@ -5,7 +5,9 @@ describe('ASSetObject', () => {
     test('serializes and loads from RPSL while preserving content', () => {
         const content = new ASSetContent([
             new ASSetMember('AS67890', IRR.Source.RIPE),
-            new ASSetMember('AS99999', IRR.Source.ARIN, ['Added to union AS_SET']),
+            new ASSetMember('AS99999', IRR.Source.ARIN, [
+                'Added to union AS_SET',
+            ]),
         ]);
 
         const object = new ASSetObject('AS-EXAMPLE', IRR.Source.RADB, content, [

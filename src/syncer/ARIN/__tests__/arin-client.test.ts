@@ -41,7 +41,9 @@ describe('ARIN client', () => {
         new ASSetObject(
             'AS-EXAMPLE-ARIN',
             IRR.Source.ARIN,
-            new ASSetContent([new ASSetMember('AS65001', IRR.Source.undetermined)]),
+            new ASSetContent([
+                new ASSetMember('AS65001', IRR.Source.undetermined),
+            ]),
             [{ name: 'ORG-TEST', source: IRR.Source.ARIN }],
         );
 
@@ -158,8 +160,13 @@ describe('ARIN client', () => {
             errorCode: '500',
             errorMessage: 'Server error',
         });
-        mockedAxios.put.mockResolvedValueOnce({ status: 500, data: '<error />' } as never);
-        await expect(arin.modifyASSet(asSet)).rejects.toThrow(/Failed to modify AS-SET/);
+        mockedAxios.put.mockResolvedValueOnce({
+            status: 500,
+            data: '<error />',
+        } as never);
+        await expect(arin.modifyASSet(asSet)).rejects.toThrow(
+            /Failed to modify AS-SET/,
+        );
 
         mockedAxios.delete.mockResolvedValueOnce({ status: 200 } as never);
         await expect(arin.deleteASSet('AS-EXAMPLE-ARIN')).resolves.toBe(true);

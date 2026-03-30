@@ -25,7 +25,9 @@ export const rpslObjectsMntByItemSchema = Type.Object(
     {
         rpslPk: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         source: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-        mntBy: Type.Optional(Type.Union([Type.Array(Type.String()), Type.Null()])),
+        mntBy: Type.Optional(
+            Type.Union([Type.Array(Type.String()), Type.Null()]),
+        ),
     },
     {
         additionalProperties: true,

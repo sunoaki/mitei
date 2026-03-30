@@ -63,6 +63,8 @@ members:
 name: missing-members
 `;
 
-        expect(() => parseContent(invalidYaml)).toThrow(/Invalid content format/);
+        expect(() => parseContent(invalidYaml)).toThrow(
+            /Invalid content format/,
+        );
     });
 });
