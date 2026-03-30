@@ -1,4 +1,6 @@
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
+import Type, { type Static } from 'typebox';
+import Value from 'typebox/value';
 
 import {
     ASSetContent,
@@ -22,6 +24,128 @@ const builder = new XMLBuilder({
     indentBy: '    ',
     suppressEmptyNode: true,
 });
+
+const arinPOCLinkRefSchema = Type.Object(
+    {
+        description: Type.Optional(Type.String()),
+        function: Type.Optional(Type.String()),
+        handle: Type.Optional(Type.String()),
+    },
+    {
+        additionalProperties: true,
+    },
+);
+
+const arinDescriptionLineNodeSchema = Type.Object(
+    {
+        '#text': Type.Optional(Type.String()),
+    },
+    {
+        additionalProperties: true,
+    },
+);
+
+const arinMemberNodeSchema = Type.Object(
+    {
+        name: Type.Optional(Type.String()),
+        '#text': Type.Optional(Type.String()),
+    },
+    {
+        additionalProperties: true,
+    },
+);
+
+const arinAsSetPayloadSchema = Type.Object(
+    {
+        asSet: Type.Object(
+            {
+                name: Type.Optional(Type.String()),
+                source: Type.Optional(Type.String()),
+                orgHandle: Type.Optional(Type.String()),
+                creationDate: Type.Optional(Type.String()),
+                lastModifiedDate: Type.Optional(Type.String()),
+                pocLinks: Type.Optional(
+                    Type.Object(
+                        {
+                            pocLinkRef: Type.Optional(
+                                Type.Union([
+                                    arinPOCLinkRefSchema,
+                                    Type.Array(arinPOCLinkRefSchema),
+                                ]),
+                            ),
+                        },
+                        {
+                            additionalProperties: true,
+                        },
+                    ),
+                ),
+                description: Type.Optional(
+                    Type.Object(
+                        {
+                            line: Type.Optional(
+                                Type.Union([
+                                    Type.String(),
+                                    arinDescriptionLineNodeSchema,
+                                    Type.Array(
+                                        Type.Union([
+                                            Type.String(),
+                                            arinDescriptionLineNodeSchema,
+                                        ]),
+                                    ),
+                                ]),
+                            ),
+                        },
+                        {
+                            additionalProperties: true,
+                        },
+                    ),
+                ),
+                members: Type.Optional(
+                    Type.Object(
+                        {
+                            member: Type.Optional(
+                                Type.Union([
+                                    Type.String(),
+                                    arinMemberNodeSchema,
+                                    Type.Array(
+                                        Type.Union([
+                                            Type.String(),
+                                            arinMemberNodeSchema,
+                                        ]),
+                                    ),
+                                ]),
+                            ),
+                        },
+                        {
+                            additionalProperties: true,
+                        },
+                    ),
+                ),
+            },
+            {
+                additionalProperties: true,
+            },
+        ),
+    },
+    {
+        additionalProperties: true,
+    },
+);
+
+type ARINAsSetPayload = Static<typeof arinAsSetPayloadSchema>;
+
+function assertValidArinAsSetPayload(
+    payload: unknown,
+): asserts payload is ARINAsSetPayload {
+    if (Value.Check(arinAsSetPayloadSchema, payload)) {
+        return;
+    }
+
+    const [firstError] = Value.Errors(arinAsSetPayloadSchema, payload);
+    const path = firstError?.instancePath ? `$${firstError.instancePath}` : '$';
+    const message = firstError?.message ?? 'schema validation failed';
+    throw new Error(`Invalid ARIN AS-SET XML payload: ${path} ${message}`);
+}
 
 /**
     * ARIN AS-SET Object
@@ -56,47 +180,10 @@ const builder = new XMLBuilder({
     * @returns An ASSetObject representing the AS-SET data.
 */
 export const xmlToASSetObject = (xmlData: string): ASSetObject => {
-    const jsonObj = parser.parse(xmlData) as {
-        asSet?: {
-            name?: string;
-            source?: string;
-            orgHandle?: string;
-            creationDate?: string;
-            lastModifiedDate?: string;
-            pocLinks?: {
-                pocLinkRef?:
-                    | {
-                          description?: string;
-                          function?: string;
-                          handle?: string;
-                      }
-                    | Array<{
-                          description?: string;
-                          function?: string;
-                          handle?: string;
-                      }>;
-            };
-            description?: {
-                line?:
-                    | string
-                    | { '#text'?: string }
-                    | Array<string | { '#text'?: string }>;
-            };
-            members?: {
-                member?:
-                    | string
-                    | { name?: string; '#text'?: string }
-                    | Array<string | { name?: string; '#text'?: string }>;
-            };
-        };
-    };
+    const parsedPayload = parser.parse(xmlData) as unknown;
+    assertValidArinAsSetPayload(parsedPayload);
 
-    const asSet = jsonObj.asSet;
-    if (!asSet) {
-        throw new Error(
-            'Invalid ARIN AS-SET XML: missing <asSet> root element.',
-        );
-    }
+    const asSet = parsedPayload.asSet;
 
     const normalizeArray = <T>(value?: T | T[]): T[] => {
         if (value === undefined) return [];
