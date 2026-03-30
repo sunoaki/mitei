@@ -1370,6 +1370,11 @@ type-check@^0.4.0, type-check@~0.4.0:
   dependencies:
     prelude-ls "^1.2.1"
 
+typebox@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/typebox/-/typebox-1.1.9.tgz#486070d76a0df2f5d806e6c027e7bde9af7f6830"
+  integrity sha512-Bqdf4iLNO4pnVePdQkzkvnEFxz4Htn5g7nVBGIpNC1rDq5ye/qxXytJPgmT+7MRKJ3k03RTNU03wtJj4V9SJzA==
+
 typescript-eslint@^8.56.1:
   version "8.56.1"
   resolved "https://registry.npmmirror.com/typescript-eslint/-/typescript-eslint-8.56.1.tgz"
