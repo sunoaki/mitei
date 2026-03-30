@@ -1,0 +1,4 @@
+{
+    "f2bb7fa3-1011-4afe-bcce-0517e73ddd8e": "as-set: as-example\nsource: RADB\ncreated: 2026-03-18T12:02:45Z\nlast-modified: 2026-03-18T12:02:45Z\nremarks: AS65001 sourced from RIPE\nmembers: AS65001\nremarks: AS65002 sourced from ARIN\nmembers: AS65002\n",
+    "9532eaa5-451b-43b8-a35a-af7a9e99ae67": "as-set: as-example\nsource: ARIN\ncreated: 2026-03-18T12:02:45Z\nlast-modified: 2026-03-18T12:02:45Z\nremarks: AS65001 sourced from RIPE\nmembers: AS65001\nremarks: AS65002 sourced from ARIN\nmembers: AS65002\n"
+}

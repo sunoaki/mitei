@@ -176,10 +176,16 @@ export class IRRObject implements IRR.Object {
                     const sourced = parseSourcedRemark(value);
 
                     if (sourced) {
-                        if (lastReference && lastReference.name === sourced.name) {
+                        if (
+                            lastReference &&
+                            lastReference.name === sourced.name
+                        ) {
                             lastReference.source = sourced.source;
                         } else {
-                            pendingSourceByName.set(sourced.name, sourced.source);
+                            pendingSourceByName.set(
+                                sourced.name,
+                                sourced.source,
+                            );
                         }
                         break;
                     }

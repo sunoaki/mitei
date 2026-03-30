@@ -51,4 +51,7 @@ const newIRR = new IRR();
 newIRR.load(exportedData);
 const loadedResults = newIRR.selector.selectByName('AS-EXAMPLE').results;
 
-console.log('Loaded IRR selector results for AS-EXAMPLE:', loadedResults[0].toRPSL());
+console.log(
+    'Loaded IRR selector results for AS-EXAMPLE:',
+    loadedResults[0].toRPSL(),
+);

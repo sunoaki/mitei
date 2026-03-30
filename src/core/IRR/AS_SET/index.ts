@@ -224,7 +224,10 @@ export class ASSetContent extends IRRContent implements as_set.Content {
             const value = rest.join(':').trim();
             if (!value) continue;
 
-            if (normalizedKey === 'description' || normalizedKey === 'members') {
+            if (
+                normalizedKey === 'description' ||
+                normalizedKey === 'members'
+            ) {
                 inContentSection = true;
             }
 

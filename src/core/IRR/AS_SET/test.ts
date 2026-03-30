@@ -75,10 +75,11 @@ console.log(
     '\nRPSL representation of the ASSetObject:\n\n' + asSetObject.toRPSL(),
 );
 
-const asSetObjectFromRPSL = asSet.ASSetObject.loadFromRPSL(asSetObject.toRPSL());
-console.log(asSetObjectFromRPSL.toRPSL())
+const asSetObjectFromRPSL = asSet.ASSetObject.loadFromRPSL(
+    asSetObject.toRPSL(),
+);
+console.log(asSetObjectFromRPSL.toRPSL());
 console.log(
     '\nASSetObject created from RPSL is equal to original?',
     asSetObject.content.isEqual(asSetObjectFromRPSL.content),
 );
-

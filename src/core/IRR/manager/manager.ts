@@ -17,6 +17,7 @@ export default class IRR<T extends IRRTypes.Object = IRRTypes.Object> {
     public nameIndex: { [key: string]: string[] } = {}; // name to UUID
     public sourceIndex: { [key in IRRTypes.Source]?: string[] } = {}; // source to UUIDs
     public typeIndex: { [key in IRRTypes.Type]?: string[] } = {}; // type to UUIDs
+    public neverExport: string[] = [];
 
     private getUUID(): string {
         return uuidv4();
@@ -105,14 +106,28 @@ export default class IRR<T extends IRRTypes.Object = IRRTypes.Object> {
     } {
         const exportData: { [uuid: string]: string } = {};
         for (const uuid in this.registrations) {
+            if (uuid in this.neverExport) {
+                continue;
+            }
             exportData[uuid] = this.registrations[uuid].toRPSL();
         }
         return exportData;
     }
 
+    public markAsNeverExport(uuid: string): void {
+        if (!this.registrations[uuid]) {
+            throw new Error(`UUID ${uuid} does not exist`);
+        }
+        if (!this.neverExport.includes(uuid)) {
+            this.neverExport.push(uuid);
+        }
+    }
+
     public load(
         data: { [uuid: string]: string },
-        objectClassMap: Partial<Record<keyof IRRTypes.TypeMap, IRRTypes.ObjectClass<any>>> = {
+        objectClassMap: Partial<
+            Record<keyof IRRTypes.TypeMap, IRRTypes.ObjectClass<any>>
+        > = {
             'as-set': ASSetObject,
         },
     ): void {
