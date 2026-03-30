@@ -4,6 +4,10 @@ import { gql } from '@apollo/client/core';
 import { IRR } from '../../core/IRR/types';
 import { IRRD as IRRDTypes } from '../types';
 import * as tools from '../tools';
+import {
+    assertValidIRRDResponse,
+    rpslObjectsMntByResponseSchema,
+} from '../schema';
 
 const RPSL_OBJECTS_MNT_BY_QUERY = gql`
     query RpslObjectsMntBy(
@@ -39,7 +43,14 @@ export default async function getMntBy(
         },
     });
 
-    const objects = result.data?.rpslObjects ?? [];
+    const responseData = result.data as unknown;
+    assertValidIRRDResponse(
+        rpslObjectsMntByResponseSchema,
+        responseData,
+        'rpslObjects',
+    );
+
+    const objects = responseData.rpslObjects;
     if (objects.length === 0) {
         return [];
     }

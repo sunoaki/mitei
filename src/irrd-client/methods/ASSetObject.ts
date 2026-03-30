@@ -4,6 +4,10 @@ import { gql } from '@apollo/client/core';
 import { IRRD as IRRDTypes } from '../types';
 import { ASSetContent, ASSetMember, ASSetObject } from '../../core/IRR/AS_SET';
 import * as tools from '../tools';
+import {
+    assertValidIRRDResponse,
+    recursiveSetMembersResponseSchema,
+} from '../schema';
 
 import getMntBy from './MntBy';
 
@@ -53,7 +57,14 @@ export default async function getASSetObject(
         },
     });
 
-    const list = result.data?.recursiveSetMembers ?? [];
+    const responseData = result.data as unknown;
+    assertValidIRRDResponse(
+        recursiveSetMembersResponseSchema,
+        responseData,
+        'recursiveSetMembers',
+    );
+
+    const list = responseData.recursiveSetMembers;
     if (list.length === 0) {
         throw new Error(`AS-SET not found: ${setName}`);
     }

@@ -1,6 +1,93 @@
 import { createServer } from 'node:net';
 import type { Socket } from 'node:net';
 import type IRRSelector from '../../core/IRR/manager/selector';
+import Type, { type Static, type TSchema } from 'typebox';
+import Value from 'typebox/value';
+import { IRR as IRRTypes } from '../../core/IRR/types';
+import { inSource, isRPSLName } from '../../core/IRR/base/tools';
+
+const whoisTokenSchema = Type.String({ minLength: 1 });
+const whoisTokenListSchema = Type.Array(whoisTokenSchema, { minItems: 1 });
+const whoisUUIDSchema = Type.String({
+    pattern:
+        '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+});
+const whoisTypeSchema = Type.Enum(IRRTypes.Type);
+
+function assertValid<Schema extends TSchema>(
+    schema: Schema,
+    value: unknown,
+    label: string,
+): asserts value is Static<Schema> {
+    if (Value.Check(schema, value)) {
+        return;
+    }
+
+    const [firstError] = Value.Errors(schema, value);
+    const path = firstError?.instancePath ? `$${firstError.instancePath}` : '$';
+    const message = firstError?.message ?? 'schema validation failed';
+    throw new Error(`Invalid ${label}: ${path} ${message}`);
+}
+
+function parseTokenList(raw: string, label: string): string[] {
+    const tokens = raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+    assertValid(whoisTokenListSchema, tokens, label);
+    return tokens;
+}
+
+function parseNameList(raw: string): string[] {
+    const names = parseTokenList(raw, 'name list');
+
+    for (const name of names) {
+        if (!isRPSLName(name)) {
+            throw new Error(`Invalid name provided: ${name}`);
+        }
+    }
+
+    return names;
+}
+
+function parseSourceList(raw: string): IRRTypes.Source[] {
+    const sources = parseTokenList(raw, 'source list').map((s) =>
+        s.toUpperCase(),
+    );
+
+    for (const source of sources) {
+        if (!inSource(source)) {
+            throw new Error(`Invalid source provided: ${source}`);
+        }
+    }
+
+    return sources as IRRTypes.Source[];
+}
+
+function parseTypeList(raw: string): IRRTypes.Type[] {
+    const types = parseTokenList(raw, 'type list').map((s) => s.toLowerCase());
+
+    for (const type of types) {
+        if (!Value.Check(whoisTypeSchema, type)) {
+            throw new Error(`Invalid type provided: ${type}`);
+        }
+    }
+
+    return types as IRRTypes.Type[];
+}
+
+function parseUUIDList(raw: string): string[] {
+    const uuids = parseTokenList(raw, 'uuid list');
+
+    for (const uuid of uuids) {
+        if (!Value.Check(whoisUUIDSchema, uuid)) {
+            throw new Error(`Invalid UUID provided: ${uuid}`);
+        }
+    }
+
+    return uuids;
+}
 
 export class whoisServer {
     public status: 'running' | 'stopped' = 'stopped';
@@ -45,18 +132,30 @@ export class whoisServer {
 
     private nameQuery(query: string, selector: IRRSelector): IRRSelector {
         const parts = query.split('::');
-        if (parts.length == 2) {
-            selector = selector.selectBySource(parts[0].trim().toUpperCase());
+        if (parts.length > 2) {
+            throw new Error(`Invalid scoped query: ${query}`);
+        }
+
+        if (parts.length === 2) {
+            const sources = parseSourceList(parts[0]);
+            selector = selector.selectBySource(
+                sources.length === 1 ? sources[0] : sources,
+            );
         }
 
         const nameTypeParts = parts[parts.length - 1].split('@');
-        if (nameTypeParts.length == 2) {
-            selector = selector.selectByType(nameTypeParts[1].trim() as any);
+        if (nameTypeParts.length > 2) {
+            throw new Error(`Invalid typed query: ${query}`);
         }
 
-        selector = selector.selectByName(
-            nameTypeParts[0].split(',').map((s) => s.trim()),
-        );
+        if (nameTypeParts.length === 2) {
+            const types = parseTypeList(nameTypeParts[1]);
+            selector = selector.selectByType(
+                types.length === 1 ? types[0] : types,
+            );
+        }
+
+        selector = selector.selectByName(parseNameList(nameTypeParts[0]));
 
         return selector;
     }
@@ -83,37 +182,50 @@ export class whoisServer {
 
         let selector: IRRSelector = this.IRRSelector.clone();
 
-        const arg = query.split(' ');
+        const arg = query
+            .split(/\s+/)
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0);
+
+        if (arg.length === 0) {
+            return selector.selectByName(['']);
+        }
 
         for (let i = 0; i < arg.length; i++) {
             switch (arg[i]) {
                 case 'name':
-                    if (i + 1 < arg.length) {
-                        selector = this.nameQuery(arg[++i], selector);
+                    if (i + 1 >= arg.length) {
+                        throw new Error('Missing value for name query.');
                     }
+                    selector = this.nameQuery(arg[++i], selector);
                     break;
                 case 'source':
-                    if (i + 1 < arg.length) {
+                    if (i + 1 >= arg.length) {
+                        throw new Error('Missing value for source query.');
+                    }
+                    {
+                        const sources = parseSourceList(arg[++i]);
                         selector = selector.selectBySource(
-                            arg[++i]
-                                .split(',')
-                                .map((s) => s.trim().toUpperCase()),
+                            sources.length === 1 ? sources[0] : sources,
                         );
                     }
                     break;
                 case 'type':
-                    if (i + 1 < arg.length) {
+                    if (i + 1 >= arg.length) {
+                        throw new Error('Missing value for type query.');
+                    }
+                    {
+                        const types = parseTypeList(arg[++i]);
                         selector = selector.selectByType(
-                            arg[++i].split(',').map((s) => s.trim() as any),
+                            types.length === 1 ? types[0] : types,
                         );
                     }
                     break;
                 case 'uuid':
-                    if (i + 1 < arg.length) {
-                        selector = selector.selectByUUIDs(
-                            arg[++i].split(',').map((s) => s.trim()),
-                        );
+                    if (i + 1 >= arg.length) {
+                        throw new Error('Missing value for uuid query.');
                     }
+                    selector = selector.selectByUUIDs(parseUUIDList(arg[++i]));
                     break;
                 default:
                     selector = this.nameQuery(arg[i], selector);
