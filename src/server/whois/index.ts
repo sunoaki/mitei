@@ -5,8 +5,8 @@ import Type, { type Static, type TSchema } from 'typebox';
 import Value from 'typebox/value';
 import { IRR as IRRTypes } from '../../core/IRR/types';
 import { inSource, isRPSLName } from '../../core/IRR/base/tools';
-import { hasResourcePermission } from '../http-api/auth/authorization';
-import type { EffectiveAuthContext } from '../http-api/auth/types';
+import { hasResourcePermission } from '../../access-control/authorization';
+import type { EffectiveAuthContext } from '../../access-control/types';
 
 interface WhoisServerOptions {
     getAuthContext?: () => Promise<EffectiveAuthContext | undefined>;

@@ -1,8 +1,11 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
-import type { RoleName, Scope } from '../../auth/permissions';
-import type { ResourcePermissionRule, UserRecord } from '../../auth/types';
+import type { RoleName, Scope } from '../../../../access-control/permissions';
+import type {
+    ResourcePermissionRule,
+    UserRecord,
+} from '../../../../access-control/types';
 
 interface UserFileData {
     users: UserRecord[];

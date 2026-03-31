@@ -3,9 +3,9 @@ import {
     hasResourcePermission,
     requireResourcePermission,
 } from '../authorization';
-import { HttpError } from '../errors';
+import { AccessControlError } from '../errors';
 
-describe('resource-level authorization', () => {
+describe('access-control resource-level authorization', () => {
     test('allows object-bound permission with matching rule', () => {
         const context = buildAuthContext(
             {
@@ -90,7 +90,7 @@ describe('resource-level authorization', () => {
                 source: 'RIPE',
                 type: 'as-set',
             }),
-        ).toThrow(HttpError);
+        ).toThrow(AccessControlError);
     });
 
     test('checks source/type pattern when rule specifies them', () => {

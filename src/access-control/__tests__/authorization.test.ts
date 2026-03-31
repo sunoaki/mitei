@@ -1,7 +1,7 @@
 import { buildAuthContext, requireScopes } from '../authorization';
-import { HttpError } from '../errors';
+import { AccessControlError } from '../errors';
 
-describe('http-api auth authorization', () => {
+describe('access-control authorization', () => {
     test('intersects token scopes with local effective scopes', () => {
         const context = buildAuthContext(
             {
@@ -66,7 +66,7 @@ describe('http-api auth authorization', () => {
         );
 
         expect(() => requireScopes(context, ['users:manage'])).toThrow(
-            HttpError,
+            AccessControlError,
         );
     });
 });

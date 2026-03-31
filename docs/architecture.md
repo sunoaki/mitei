@@ -12,6 +12,10 @@ flowchart LR
         WHOIS[server/whois]
     end
 
+    subgraph SharedLayer[Shared Logic Layer]
+        ACL[access-control]
+    end
+
     subgraph DomainLayer[Domain Layer]
         CORE[core]
         EIRR[easyirr]
@@ -29,6 +33,8 @@ flowchart LR
 
     HTTP --> CORE
     WHOIS --> CORE
+    HTTP --> ACL
+    WHOIS --> ACL
 
     EIRR --> CORE
     EIRR -. optional query .-> IRRD
@@ -52,11 +58,13 @@ flowchart LR
 - Core changes usually affect both HTTP and WHOIS behavior.
 - Sync behavior changes usually touch both core and syncer/ARIN.
 - EasyIRR parsing or expansion changes may involve irrd-client.
-- For auth and resource rules, focus inside server/http-api/auth and server/http-api/user.
+- For authorization and resource rules, focus in src/access-control first.
+- For token verification and HTTP auth integration, focus in server/http-api/auth.
 
 ## Fast Entry Paths
 
 - IRR object logic: src/core/IRR/AS_SET, src/core/IRR/manager
 - Sync pipeline: src/core/index.ts, src/syncer/types.ts, src/syncer/ARIN/arin-client.ts
-- HTTP auth and permissions: src/server/http-api/auth, src/server/http-api/user
+- Authorization core: src/access-control
+- HTTP auth integration: src/server/http-api/auth, src/server/http-api/user
 - WHOIS query behavior: src/server/whois/index.ts

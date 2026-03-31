@@ -7,6 +7,7 @@
 - 核心领域引擎：`src/core`
 - 面向 YAML 的 AS-SET 组装：`src/easyirr`
 - IRRd GraphQL 适配：`src/irrd-client`
+- 共享权限核心：`src/access-control`
 - 服务层：`src/server`（HTTP API + WHOIS）
 - 外部注册系统适配：`src/syncer`
 - 共享测试工具：`src/test-utils`
@@ -15,8 +16,9 @@
 
 - `src/core` 仅依赖 `src/syncer/types.ts` 的接口定义。
 - `src/easyirr` 依赖 `src/core`，成员处理中可使用 `src/irrd-client`。
-- `src/server/http-api` 依赖 `src/core` 与 auth/user 子系统。
-- `src/server/whois` 依赖 `src/core/IRR/manager/selector`。
+- `src/access-control` 保持与框架无关，集中承载授权逻辑。
+- `src/server/http-api` 依赖 `src/core`、`src/access-control` 与 auth/user 子系统。
+- `src/server/whois` 依赖 `src/core/IRR/manager/selector` 与 `src/access-control`。
 - `src/syncer` 依赖 core 的 IRR 对象类型。
 
 ## 按任务定位入口
@@ -28,6 +30,8 @@
     - `src/core/index.ts`
     - `src/syncer/types.ts`
     - `src/syncer/ARIN/arin-client.ts`
+- 修改授权与资源规则逻辑：
+    - `src/access-control/*`
 - 修改 HTTP API/鉴权：
     - `src/server/http-api/server.ts`
     - `src/server/http-api/auth/*`
@@ -48,6 +52,7 @@
 - `src/core/readme.md` / `src/core/readme_cn.md`
 - `src/easyirr/readme.md` / `src/easyirr/readme_cn.md`
 - `src/irrd-client/readme.md` / `src/irrd-client/readme_cn.md`
+- `src/access-control/readme.md` / `src/access-control/readme_cn.md`
 - `src/server/readme.md` / `src/server/readme_cn.md`
 - `src/syncer/readme.md` / `src/syncer/readme_cn.md`
 - `src/test-utils/readme.md` / `src/test-utils/readme_cn.md`

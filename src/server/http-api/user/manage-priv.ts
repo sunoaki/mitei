@@ -1,9 +1,9 @@
 import Type from 'typebox';
 import type { FastifyInstance } from 'fastify';
-import { asRole, asScope } from '../auth/permissions';
+import { asRole, asScope } from '../../../access-control/permissions';
 import { HttpError } from '../auth/errors';
 import type { UserStore } from './repository/user-store';
-import type { Scope } from '../auth/permissions';
+import type { Scope } from '../../../access-control/permissions';
 
 interface ManagePrivilegeRoutesOptions {
     userStore: UserStore;

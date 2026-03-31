@@ -1,11 +1,15 @@
 import Type from 'typebox';
 import type { FastifyInstance } from 'fastify';
 import { HttpError } from '../auth/errors';
-import { asRole, asScope, roleNames } from '../auth/permissions';
-import { listKnownScopes } from '../auth/authorization';
+import {
+    asRole,
+    asScope,
+    roleNames,
+} from '../../../access-control/permissions';
+import { listKnownScopes } from '../../../access-control/authorization';
 import type { UserStore } from './repository/user-store';
 import { registerManagePrivilegeRoutes } from './manage-priv';
-import type { RoleName, Scope } from '../auth/permissions';
+import type { RoleName, Scope } from '../../../access-control/permissions';
 
 interface UserRoutesOptions {
     userStore: UserStore;

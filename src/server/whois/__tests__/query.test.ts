@@ -6,7 +6,7 @@ import {
 } from '../../../core/IRR/AS_SET';
 import IRRManager from '../../../core/IRR/manager/manager';
 import WhoisServer from '../index';
-import { buildAuthContext } from '../../http-api/auth/authorization';
+import { buildAuthContext } from '../../../access-control/authorization';
 
 function createMockSocket() {
     const chunks: string[] = [];

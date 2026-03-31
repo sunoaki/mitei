@@ -1,5 +1,5 @@
-import { buildAuthContext } from '../http-api/auth/authorization';
-import type { EffectiveAuthContext } from '../http-api/auth/types';
+import { buildAuthContext } from '../../access-control/authorization';
+import type { EffectiveAuthContext } from '../../access-control/types';
 import type { UserStore } from '../http-api/user/repository/user-store';
 
 export const WHOIS_INTERNAL_USER = {
