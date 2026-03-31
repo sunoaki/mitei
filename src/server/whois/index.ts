@@ -5,6 +5,12 @@ import Type, { type Static, type TSchema } from 'typebox';
 import Value from 'typebox/value';
 import { IRR as IRRTypes } from '../../core/IRR/types';
 import { inSource, isRPSLName } from '../../core/IRR/base/tools';
+import { hasResourcePermission } from '../http-api/auth/authorization';
+import type { EffectiveAuthContext } from '../http-api/auth/types';
+
+interface WhoisServerOptions {
+    getAuthContext?: () => Promise<EffectiveAuthContext | undefined>;
+}
 
 const whoisTokenSchema = Type.String({ minLength: 1 });
 const whoisTokenListSchema = Type.Array(whoisTokenSchema, { minItems: 1 });
@@ -93,17 +99,21 @@ export class whoisServer {
     public status: 'running' | 'stopped' = 'stopped';
     private server: ReturnType<typeof createServer>;
     private IRRSelector: IRRSelector;
+    private readonly getAuthContext: () => Promise<
+        EffectiveAuthContext | undefined
+    >;
 
     public banner: string[] = [];
 
-    constructor(irrSelector: IRRSelector) {
+    constructor(irrSelector: IRRSelector, options: WhoisServerOptions = {}) {
         this.IRRSelector = irrSelector;
+        this.getAuthContext = options.getAuthContext ?? (async () => undefined);
 
         this.server = createServer((socket) => {
             socket.setEncoding('utf-8');
 
-            socket.on('data', (data) => {
-                this.handleRequest(socket, data.toString());
+            socket.on('data', async (data) => {
+                await this.handleRequest(socket, data.toString());
 
                 socket.end();
             });
@@ -236,7 +246,23 @@ export class whoisServer {
         return selector;
     }
 
-    private handleRequest(socket: Socket, data: string) {
+    private canReadObject(
+        context: EffectiveAuthContext | undefined,
+        uuid: string,
+        object: IRRTypes.Object,
+    ): boolean {
+        if (!context) {
+            return true;
+        }
+
+        return hasResourcePermission(context, 'irrobject', 'read', {
+            identifiers: [uuid, object.name, `${object.name}@${object.type}`],
+            source: object.source,
+            type: object.type,
+        });
+    }
+
+    private async handleRequest(socket: Socket, data: string): Promise<void> {
         if (this.banner.length > 0) {
             socket.write(this.banner.join('\n'));
             socket.write('\n');
@@ -245,22 +271,24 @@ export class whoisServer {
         try {
             const startTime = Date.now();
             const selector = this.query(data);
+            const authContext = await this.getAuthContext();
             const endTime = Date.now();
 
-            const results = selector.resultsMap;
+            const visibleEntries = Object.entries(selector.resultsMap).filter(
+                ([uuid, object]) =>
+                    this.canReadObject(authContext, uuid, object),
+            );
 
-            if (selector.results.length === 0) {
+            if (visibleEntries.length === 0) {
                 socket.write(
                     '% No entries found for the selected source(s).\n',
                 );
             } else {
                 socket.write(`% Query: ${data.trim()}\n\n`);
-                socket.write(`% ${selector.results.length} objects found.\n\n`);
+                socket.write(`% ${visibleEntries.length} objects found.\n\n`);
 
-                for (const result in results) {
-                    socket.write(
-                        `${results[result].toRPSL()}uuid: ${result}\n\n`,
-                    );
+                for (const [uuid, object] of visibleEntries) {
+                    socket.write(`${object.toRPSL()}uuid: ${uuid}\n\n`);
                 }
 
                 socket.write(

@@ -6,6 +6,20 @@ import {
 } from '../../../core/IRR/AS_SET';
 import IRRManager from '../../../core/IRR/manager/manager';
 import WhoisServer from '../index';
+import { buildAuthContext } from '../../http-api/auth/authorization';
+
+function createMockSocket() {
+    const chunks: string[] = [];
+
+    return {
+        socket: {
+            write: (chunk: string) => {
+                chunks.push(chunk);
+            },
+        } as unknown as { write: (chunk: string) => void },
+        readOutput: () => chunks.join(''),
+    };
+}
 
 describe('whois query syntax', () => {
     const buildObject = (name: string, source: IRRTypes.Source, asn: string) =>
@@ -129,5 +143,70 @@ describe('whois query syntax', () => {
         expect(() => whois.query('as-short@as-set@as-set')).toThrow(
             /Invalid typed query/,
         );
+    });
+
+    test('filters result output by irrobject read permission', async () => {
+        const manager = new IRRManager();
+        manager.register(
+            buildObject('AS-ALLOWED', IRRTypes.Source.RADB, 'AS65021'),
+        );
+        manager.register(
+            buildObject('AS-DENIED', IRRTypes.Source.RADB, 'AS65022'),
+        );
+
+        const context = buildAuthContext(
+            {
+                issuer: 'mitei-internal',
+                subject: 'mitei-internal-whois',
+                scopes: [],
+                tokenType: 'dev',
+                rawClaims: {},
+            },
+            {
+                id: 'u-whois',
+                issuer: 'mitei-internal',
+                subject: 'mitei-internal-whois',
+                displayName: 'mitei-internal-whois',
+                enabled: true,
+                roles: ['viewer'],
+                scopes: {
+                    grant: [],
+                    deny: [],
+                },
+                resourceRules: [
+                    {
+                        resource: 'irrobject',
+                        action: 'read',
+                        objectPattern: 'as-allowed@*',
+                    },
+                ],
+                createdAt: '2024-01-01T00:00:00.000Z',
+                updatedAt: '2024-01-01T00:00:00.000Z',
+            },
+        );
+
+        const whois = new WhoisServer(manager.selector, {
+            getAuthContext: async () => context,
+        });
+
+        const { socket, readOutput } = createMockSocket();
+
+        await (
+            whois as unknown as {
+                handleRequest: (
+                    socket: unknown,
+                    request: string,
+                ) => Promise<void>;
+            }
+        ).handleRequest(
+            socket,
+            'name as-allowed,as-denied source radb type as-set',
+        );
+
+        const output = readOutput();
+
+        expect(output).toContain('as-set: as-allowed');
+        expect(output).not.toContain('as-set: as-denied');
+        expect(output).toContain('% 1 objects found.');
     });
 });

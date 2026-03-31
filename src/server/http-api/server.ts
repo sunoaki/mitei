@@ -8,6 +8,7 @@ import { registerAuthPlugin } from './auth/plugin';
 import { registerUserRoutes } from './user';
 import { registerResourceRoutes } from './resources';
 import { UserStore } from './user/repository/user-store';
+import { ensureInternalWhoisUser } from '../whois/auth';
 
 async function bootstrapAdminUser(userStore: UserStore): Promise<void> {
     const bootstrapIssuer = process.env.MITEI_BOOTSTRAP_ISSUER?.trim();
@@ -72,6 +73,7 @@ async function startServer(
     );
 
     await bootstrapAdminUser(userStore);
+    await ensureInternalWhoisUser(userStore);
 
     await registerAuthPlugin(fastify, {
         tokenVerifier,

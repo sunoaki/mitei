@@ -5,6 +5,10 @@ import tseslint from 'typescript-eslint';
 export default [
     { files: ['src/**/*.{js,mjs,cjs,ts}', 'test/**/*.{js,mjs,cjs,ts}'] },
     {
+        files: ['*.cjs', 'scripts/**/*.{js,mjs,cjs}'],
+        languageOptions: { globals: { ...globals.node } },
+    },
+    {
         files: ['src/**/*.{js,mjs,cjs,ts}'],
         languageOptions: { globals: { ...globals.browser, ...globals.node } },
     },
